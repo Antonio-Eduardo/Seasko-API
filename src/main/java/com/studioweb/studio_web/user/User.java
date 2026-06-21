@@ -18,5 +18,6 @@ public class User {
     private String nome;
     private String usuario;
     private String senha;
+    private UserRole role;
     private Boolean ativo;
 }
