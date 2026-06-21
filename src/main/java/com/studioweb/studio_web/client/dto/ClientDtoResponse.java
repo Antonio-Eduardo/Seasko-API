@@ -1,15 +1,12 @@
 package com.studioweb.studio_web.client.dto;
 
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
-@Data
-public class ClientDtoResponse {
 
-    public Long id;
-    public String nome;
-    public String telefone;
-    public String anotacao;
-    public LocalDateTime criadoEm;
-}
+public record ClientDtoResponse(
+        Long id,
+        String nome,
+        String telefone,
+        String anotacao,
+        LocalDateTime criadoEm
+) {}
