@@ -28,6 +28,7 @@ public class Appointment {
     private User user;
     private String descricao;
     private LocalDate dataMarcada;
+    private AppointmentStatus status;
     private LocalTime horaInicio;
     private LocalTime horaFim;
     private LocalDateTime criadoEm;
