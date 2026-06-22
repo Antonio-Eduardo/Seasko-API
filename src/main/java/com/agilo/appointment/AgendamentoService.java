@@ -4,18 +4,20 @@ import com.agilo.appointment.dto.AgendamentoDtoRequest;
 import com.agilo.appointment.dto.AgendamentoDtoResponse;
 import com.agilo.client.Cliente;
 import com.agilo.client.ClienteRepository;
+import com.agilo.common.PageResponse;
 import com.agilo.exception.AppointmentNotFoundException;
 import com.agilo.exception.ClientNotFoundException;
 import com.agilo.exception.UserNotFoundException;
 import com.agilo.user.Usuario;
 import com.agilo.user.UsuarioRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class AgendamentoService {
@@ -32,13 +34,14 @@ public class AgendamentoService {
         this.userRepository = userRepository;
     }
 
-    public List<AgendamentoDtoResponse> getAllAppointments(
+    public PageResponse<AgendamentoDtoResponse> getAllAppointments(
             LocalDate data,
             Integer mes,
             Integer ano,
             Long clienteId,
             Long usuarioId,
-            AgendamentoStatus status) {
+            AgendamentoStatus status,
+            Pageable pageable) {
 
         var spec = Specification
                 .where(AgendamentoSpecification.porData(data))
@@ -47,9 +50,14 @@ public class AgendamentoService {
                 .and(AgendamentoSpecification.porUsuario(usuarioId))
                 .and(AgendamentoSpecification.porStatus(status));
 
-        return appointmentRepository.findAll(spec).stream()
-                .map(this::toResponse)
-                .toList();
+        Page<Agendamento> page = appointmentRepository.findAll(spec, pageable);
+        return new PageResponse<>(
+                page.getContent().stream().map(this::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public AgendamentoDtoResponse getAppointmentById(Long id) {

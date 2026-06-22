@@ -4,6 +4,7 @@ import com.agilo.appointment.dto.AgendamentoDtoRequest;
 import com.agilo.appointment.dto.AgendamentoDtoResponse;
 import com.agilo.client.Cliente;
 import com.agilo.client.ClienteRepository;
+import com.agilo.common.PageResponse;
 import com.agilo.exception.AppointmentNotFoundException;
 import com.agilo.exception.ClientNotFoundException;
 import com.agilo.exception.UserNotFoundException;
@@ -24,6 +25,9 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,26 +86,31 @@ class AgendamentoServiceTest {
 
     @Test
     void getAllAppointments_returnsMappedList() {
-        when(appointmentRepository.findAll(any(Specification.class)))
-                .thenReturn(List.of(agendamento));
+        Pageable pageable = PageRequest.of(0, 25);
+        when(appointmentRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(agendamento), pageable, 1));
 
-        List<AgendamentoDtoResponse> result = service.getAllAppointments(
-                null, null, null, null, null, null
+        PageResponse<AgendamentoDtoResponse> result = service.getAllAppointments(
+                null, null, null, null, null, null, pageable
         );
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).id()).isEqualTo(1L);
-        assertThat(result.get(0).status()).isEqualTo(AgendamentoStatus.MARCADO);
-        assertThat(result.get(0).clientId()).isEqualTo(1L);
-        assertThat(result.get(0).userId()).isEqualTo(1L);
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.totalElements()).isEqualTo(1L);
+        assertThat(result.content().get(0).id()).isEqualTo(1L);
+        assertThat(result.content().get(0).status()).isEqualTo(AgendamentoStatus.MARCADO);
+        assertThat(result.content().get(0).clientId()).isEqualTo(1L);
+        assertThat(result.content().get(0).userId()).isEqualTo(1L);
     }
 
     @Test
     void getAllAppointments_emptyRepository_returnsEmptyList() {
-        when(appointmentRepository.findAll(any(Specification.class)))
-                .thenReturn(List.of());
+        Pageable pageable = PageRequest.of(0, 25);
+        when(appointmentRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
-        assertThat(service.getAllAppointments(null, null, null, null, null, null)).isEmpty();
+        PageResponse<AgendamentoDtoResponse> result = service.getAllAppointments(null, null, null, null, null, null, pageable);
+        assertThat(result.content()).isEmpty();
+        assertThat(result.totalElements()).isZero();
     }
 
     @Test

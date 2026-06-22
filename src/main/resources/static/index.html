@@ -315,6 +315,15 @@
   #toast.show { opacity: 1; animation: slideUp .2s ease; }
   #toast.err  { background: var(--danger); }
 
+  /* ── Paginação ── */
+  .pag-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 4px 2px; font-size: .8rem; color: var(--color-sub);
+    flex-wrap: wrap; gap: 8px;
+  }
+  .pag-btns { display: flex; align-items: center; gap: 6px; }
+  .pag-btns span { padding: 4px 8px; }
+
   /* ── Responsividade ── */
   @media (max-width: 768px) {
     #app { padding: 16px 12px; }
@@ -563,6 +572,7 @@
           </tbody>
         </table>
       </div>
+      <div id="pag-ag" class="pag-bar"></div>
     </div>
   </div>
 
@@ -612,6 +622,7 @@
           </tbody>
         </table>
       </div>
+      <div id="pag-cl" class="pag-bar"></div>
     </div>
   </div>
 
@@ -746,6 +757,8 @@ let usuarioLogadoRole = '';
 let clientes          = [];
 let usuarios          = [];
 let agendamentosCache = [];
+let agPage = 0;
+let clPage = 0;
 
 const STATUS = ['MARCADO','CONFIRMADO','CANCELADO','CONCLUIDO','NAO_APARECEU'];
 
@@ -784,6 +797,8 @@ function logout() {
   usuarioLogadoRole = '';
   clientes          = [];
   usuarios          = [];
+  agPage = 0;
+  clPage = 0;
   document.getElementById('u').value = '';
   document.getElementById('p').value = '';
   document.getElementById('login-err').textContent = '';
@@ -821,12 +836,12 @@ async function carregarTudo() {
   setLoading('tbody-ag', 8);
   setLoading('tbody-cl', 6);
   setLoading('tbody-usr', 5);
-  const [ags, cls, usrs] = await Promise.all([
-    api('/agendamento'),
-    api('/cliente'),
+  const [agsResp, clsResp, usrs] = await Promise.all([
+    api('/agendamento?page=0&size=25'),
+    api('/cliente?page=0&size=25'),
     api('/usuario')
   ]);
-  clientes = cls;
+  clientes = clsResp.content;
   usuarios = usrs;
 
   const meu = usrs.find(u => u.usuario === usuarioLogado);
@@ -839,8 +854,8 @@ async function carregarTudo() {
   document.getElementById('header-usuario').textContent = usuarioLogado;
 
   preencherDropdowns();
-  renderAgendamentos(ags);
-  renderClientes(cls);
+  renderAgendamentos(agsResp);
+  renderClientes(clsResp);
   renderUsuarios(usrs);
 }
 
@@ -855,25 +870,26 @@ function preencherDropdowns() {
 }
 
 // ── Filtros ───────────────────────────────────────────────────────────────
-async function aplicarFiltros() {
+function buildFiltroParams() {
   const params = new URLSearchParams();
-  const data    = document.getElementById('fil-data').value;
-  const mes     = document.getElementById('fil-mes').value;
-  const ano     = document.getElementById('fil-ano').value;
-  const cli     = document.getElementById('fil-cliente').value;
-  const usr     = document.getElementById('fil-usuario').value;
-  const status  = document.getElementById('fil-status').value;
+  const data   = document.getElementById('fil-data').value;
+  const mes    = document.getElementById('fil-mes').value;
+  const ano    = document.getElementById('fil-ano').value;
+  const cli    = document.getElementById('fil-cliente').value;
+  const usr    = document.getElementById('fil-usuario').value;
+  const status = document.getElementById('fil-status').value;
   if (data)   params.set('data',      data);
   if (mes)    params.set('mes',       mes);
   if (ano)    params.set('ano',       ano);
   if (cli)    params.set('clienteId', cli);
   if (usr)    params.set('usuarioId', usr);
   if (status) params.set('status',    status);
-  try {
-    setLoading('tbody-ag', 8);
-    const qs = params.toString();
-    renderAgendamentos(await api('/agendamento' + (qs ? '?' + qs : '')));
-  } catch (e) { toast(e.message, true); }
+  return params;
+}
+
+async function aplicarFiltros() {
+  agPage = 0;
+  await recarregarAgendamentos();
 }
 
 function limparFiltros() {
@@ -887,11 +903,13 @@ function limparFiltros() {
 // AGENDAMENTOS
 // ══════════════════════════════════════════════════════════════════════════
 
-function renderAgendamentos(lista) {
+function renderAgendamentos(pageResp) {
+  const lista = pageResp.content;
   agendamentosCache = lista;
   const tbody = document.getElementById('tbody-ag');
   if (!lista.length) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum agendamento.</td></tr>';
+    document.getElementById('pag-ag').innerHTML = '';
     return;
   }
   const isAdmin = usuarioLogadoRole === 'ADMIN';
@@ -916,6 +934,31 @@ function renderAgendamentos(lista) {
       </td>
     </tr>
   `).join('');
+  const { page, totalPages, totalElements } = pageResp;
+  document.getElementById('pag-ag').innerHTML = totalPages <= 1 ? `<span>Total: ${totalElements} agendamento(s)</span>` : `
+    <span>Total: ${totalElements} agendamento(s)</span>
+    <div class="pag-btns">
+      <button class="btn btn-ghost btn-sm" onclick="mudarPaginaAg(-1)" ${page === 0 ? 'disabled' : ''}>← Anterior</button>
+      <span>Página ${page + 1} de ${totalPages}</span>
+      <button class="btn btn-ghost btn-sm" onclick="mudarPaginaAg(1)" ${page >= totalPages - 1 ? 'disabled' : ''}>Próxima →</button>
+    </div>
+  `;
+}
+
+async function recarregarAgendamentos() {
+  setLoading('tbody-ag', 8);
+  document.getElementById('pag-ag').innerHTML = '';
+  try {
+    const params = buildFiltroParams();
+    params.set('page', agPage);
+    params.set('size', 25);
+    renderAgendamentos(await api('/agendamento?' + params.toString()));
+  } catch (e) { toast(e.message, true); }
+}
+
+function mudarPaginaAg(delta) {
+  agPage += delta;
+  recarregarAgendamentos();
 }
 
 function toggleForm() {
@@ -1018,10 +1061,12 @@ async function deletarAg(id) {
 // CLIENTES
 // ══════════════════════════════════════════════════════════════════════════
 
-function renderClientes(lista) {
+function renderClientes(pageResp) {
+  const lista = pageResp.content ?? pageResp;
   const tbody = document.getElementById('tbody-cl');
   if (!lista.length) {
     tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhum cliente cadastrado.</td></tr>';
+    document.getElementById('pag-cl').innerHTML = '';
     return;
   }
   tbody.innerHTML = lista.map(c => `
@@ -1039,6 +1084,16 @@ function renderClientes(lista) {
       </td>
     </tr>
   `).join('');
+  if (!pageResp.totalPages) { document.getElementById('pag-cl').innerHTML = ''; return; }
+  const { page, totalPages, totalElements } = pageResp;
+  document.getElementById('pag-cl').innerHTML = totalPages <= 1 ? `<span>Total: ${totalElements} cliente(s)</span>` : `
+    <span>Total: ${totalElements} cliente(s)</span>
+    <div class="pag-btns">
+      <button class="btn btn-ghost btn-sm" onclick="mudarPaginaCl(-1)" ${page === 0 ? 'disabled' : ''}>← Anterior</button>
+      <span>Página ${page + 1} de ${totalPages}</span>
+      <button class="btn btn-ghost btn-sm" onclick="mudarPaginaCl(1)" ${page >= totalPages - 1 ? 'disabled' : ''}>Próxima →</button>
+    </div>
+  `;
 }
 
 function toggleFormCliente() {
@@ -1102,7 +1157,7 @@ async function salvarCliente(id) {
   } catch (e) { toast(e.message, true); }
 }
 
-function cancelarEdicao() { renderClientes(clientes); }
+function cancelarEdicao() { recarregarClientes(); }
 
 async function deletarCl(id) {
   const c = clientes.find(x => x.id === id);
@@ -1114,16 +1169,20 @@ async function deletarCl(id) {
   } catch (e) { toast(e.message, true); }
 }
 
-async function recarregarAgendamentos() {
-  setLoading('tbody-ag', 8);
-  renderAgendamentos(await api('/agendamento'));
-}
-
 async function recarregarClientes() {
   setLoading('tbody-cl', 6);
-  clientes = await api('/cliente');
-  preencherDropdowns();
-  renderClientes(clientes);
+  document.getElementById('pag-cl').innerHTML = '';
+  try {
+    const resp = await api(`/cliente?page=${clPage}&size=25`);
+    clientes = resp.content;
+    preencherDropdowns();
+    renderClientes(resp);
+  } catch (e) { toast(e.message, true); }
+}
+
+function mudarPaginaCl(delta) {
+  clPage += delta;
+  recarregarClientes();
 }
 
 // ══════════════════════════════════════════════════════════════════════════

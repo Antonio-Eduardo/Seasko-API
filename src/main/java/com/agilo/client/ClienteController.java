@@ -2,12 +2,14 @@ package com.agilo.client;
 
 import com.agilo.client.dto.ClienteDtoRequest;
 import com.agilo.client.dto.ClienteDtoResponse;
+import com.agilo.common.PageResponse;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/cliente")
@@ -19,9 +21,12 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
     @GetMapping
-    public ResponseEntity<List<ClienteDtoResponse>> todosClientes(){
-        List<ClienteDtoResponse> response = clienteService.getAllClients();
-        return ResponseEntity.ok().body(response);
+    public ResponseEntity<PageResponse<ClienteDtoResponse>> todosClientes(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "25") int size) {
+        var pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
+        PageResponse<ClienteDtoResponse> response = clienteService.getAllClients(pageable);
+        return ResponseEntity.ok(response);
     }
     @GetMapping("/{id}")
     public ResponseEntity<ClienteDtoResponse> buscarCliente(@PathVariable Long id){

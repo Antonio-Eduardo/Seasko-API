@@ -2,6 +2,7 @@ package com.agilo.client;
 
 import com.agilo.client.dto.ClienteDtoRequest;
 import com.agilo.client.dto.ClienteDtoResponse;
+import com.agilo.common.PageResponse;
 import com.agilo.exception.ClientNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,22 +47,27 @@ class ClienteServiceTest {
 
     @Test
     void getAllClients_returnsMappedList() {
-        when(repository.findAll()).thenReturn(List.of(cliente));
+        Pageable pageable = PageRequest.of(0, 25);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(cliente), pageable, 1));
 
-        List<ClienteDtoResponse> result = service.getAllClients();
+        PageResponse<ClienteDtoResponse> result = service.getAllClients(pageable);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).id()).isEqualTo(1L);
-        assertThat(result.get(0).nome()).isEqualTo("João");
-        assertThat(result.get(0).telefone()).isEqualTo("11999990000");
-        assertThat(result.get(0).anotacao()).isEqualTo("prefere manhãs");
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.totalElements()).isEqualTo(1L);
+        assertThat(result.content().get(0).id()).isEqualTo(1L);
+        assertThat(result.content().get(0).nome()).isEqualTo("João");
+        assertThat(result.content().get(0).telefone()).isEqualTo("11999990000");
+        assertThat(result.content().get(0).anotacao()).isEqualTo("prefere manhãs");
     }
 
     @Test
     void getAllClients_emptyRepository_returnsEmptyList() {
-        when(repository.findAll()).thenReturn(List.of());
+        Pageable pageable = PageRequest.of(0, 25);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
-        assertThat(service.getAllClients()).isEmpty();
+        PageResponse<ClienteDtoResponse> result = service.getAllClients(pageable);
+        assertThat(result.content()).isEmpty();
+        assertThat(result.totalElements()).isZero();
     }
 
     @Test

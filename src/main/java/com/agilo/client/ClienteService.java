@@ -2,12 +2,14 @@ package com.agilo.client;
 
 import com.agilo.client.dto.ClienteDtoRequest;
 import com.agilo.client.dto.ClienteDtoResponse;
+import com.agilo.common.PageResponse;
 import com.agilo.exception.ClientNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ClienteService {
@@ -18,10 +20,15 @@ public class ClienteService {
         this.repository = repository;
     }
 
-    public List<ClienteDtoResponse> getAllClients() {
-        return repository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public PageResponse<ClienteDtoResponse> getAllClients(Pageable pageable) {
+        Page<Cliente> page = repository.findAll(pageable);
+        return new PageResponse<>(
+                page.getContent().stream().map(this::toResponse).toList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     public ClienteDtoResponse getClientById(Long id) {
