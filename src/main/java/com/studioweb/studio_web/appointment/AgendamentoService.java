@@ -9,9 +9,11 @@ import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
 import com.studioweb.studio_web.user.Usuario;
 import com.studioweb.studio_web.user.UsuarioRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,8 +32,22 @@ public class AgendamentoService {
         this.userRepository = userRepository;
     }
 
-    public List<AgendamentoDtoResponse> getAllAppointments() {
-        return appointmentRepository.findAll().stream()
+    public List<AgendamentoDtoResponse> getAllAppointments(
+            LocalDate data,
+            Integer mes,
+            Integer ano,
+            Long clienteId,
+            Long usuarioId,
+            AgendamentoStatus status) {
+
+        var spec = Specification
+                .where(AgendamentoSpecification.porData(data))
+                .and(AgendamentoSpecification.porMes(mes, ano))
+                .and(AgendamentoSpecification.porCliente(clienteId))
+                .and(AgendamentoSpecification.porUsuario(usuarioId))
+                .and(AgendamentoSpecification.porStatus(status));
+
+        return appointmentRepository.findAll(spec).stream()
                 .map(this::toResponse)
                 .toList();
     }

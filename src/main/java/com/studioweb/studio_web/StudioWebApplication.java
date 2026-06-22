@@ -30,5 +30,21 @@ public class StudioWebApplication {
 			}
 		};
 	}
+	@Bean
+	public CommandLineRunner init(UsuarioRepository userRepository,
+								  PasswordEncoder passwordEncoder) {
+		return args -> {
+
+			String username = "Eduardo";
+
+			userRepository.findByUsuario(username).ifPresent(user -> {
+
+				user.setSenha(passwordEncoder.encode("admin123"));
+				userRepository.save(user);
+
+			});
+
+		};
+	}
 
 }
