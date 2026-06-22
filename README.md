@@ -1,4 +1,4 @@
-# Studio Web
+# Vettore
 
 API REST para gerenciamento de agendamentos de um estúdio (salão de beleza, barbearia, etc.).
 Construída com Spring Boot 4.1.0 + Java 21 + PostgreSQL.
