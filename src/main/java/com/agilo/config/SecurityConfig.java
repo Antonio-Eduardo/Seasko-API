@@ -2,14 +2,11 @@ package com.agilo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -25,6 +22,12 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/public/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/usuario/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/usuario/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/agendamento/deletar/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/cliente/deletar/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/usuario/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

@@ -217,6 +217,7 @@
     <h1>Agilo</h1>
     <div style="display:flex;gap:8px;align-items:center">
       <button id="dark-toggle" onclick="toggleDark()">Dark mode</button>
+      <button class="btn btn-ghost" onclick="logout()">Sair</button>
       <button class="btn btn-primary" id="btn-novo" onclick="toggleForm()">+ Novo agendamento</button>
     </div>
   </header>
@@ -224,6 +225,7 @@
   <div class="tabs">
     <button class="tab active" onclick="mudarAba('agendamentos')">Agendamentos</button>
     <button class="tab"        onclick="mudarAba('clientes')">Clientes</button>
+    <button class="tab"        onclick="mudarAba('usuarios')">Usuários</button>
     <button class="tab"        onclick="mudarAba('config')">Configurações</button>
   </div>
 
@@ -324,7 +326,7 @@
           <thead>
             <tr>
               <th>#</th><th>Data</th><th>Horário</th><th>Cliente</th>
-              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Ações</th>
+              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Status rápido</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-ag">
@@ -370,6 +372,53 @@
           </thead>
           <tbody id="tbody-cl">
             <tr><td colspan="6" class="empty">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ABA: USUÁRIOS ───────────────────────────────────────────────── -->
+  <div id="aba-usuarios" style="display:none">
+    <div class="card" id="form-usuario" style="display:none">
+      <div class="card-title">Novo usuário</div>
+      <div class="grid">
+        <div class="field">
+          <label>Nome</label>
+          <input id="usr-nome" type="text" />
+        </div>
+        <div class="field">
+          <label>Usuário (login)</label>
+          <input id="usr-usuario" type="text" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input id="usr-senha" type="password" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="usr-role">
+            <option value="EMPLOYEE">EMPLOYEE</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="criarUsuario()">Salvar</button>
+        <button class="btn btn-ghost"   onclick="toggleFormUsuario()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Nome</th><th>Usuário</th><th>Role</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-usr">
+            <tr><td colspan="5" class="empty">Carregando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -432,8 +481,9 @@ function toggleDark() {
 
 // ── Estado ────────────────────────────────────────────────────────────────
 let auth             = '';
-let usuarioLogado    = '';   // nome de login usado para entrar
-let usuarioLogadoId  = null; // id resolvido após carregar a lista
+let usuarioLogado    = '';
+let usuarioLogadoId  = null;
+let usuarioLogadoRole = '';
 let clientes         = [];
 let usuarios         = [];
 
@@ -469,7 +519,7 @@ document.addEventListener('keydown', e => {
 
 // ── Abas ──────────────────────────────────────────────────────────────────
 function mudarAba(aba) {
-  ['agendamentos','clientes','config'].forEach((id, i) => {
+  ['agendamentos','clientes','usuarios','config'].forEach((id, i) => {
     document.getElementById(`aba-${id}`).style.display = aba === id ? 'block' : 'none';
     document.querySelectorAll('.tab')[i].classList.toggle('active', aba === id);
   });
@@ -482,6 +532,10 @@ function mudarAba(aba) {
   } else if (aba === 'clientes') {
     btnNovo.textContent = '+ Novo cliente';
     btnNovo.onclick = toggleFormCliente;
+    btnNovo.style.display = '';
+  } else if (aba === 'usuarios' && usuarioLogadoRole === 'ADMIN') {
+    btnNovo.textContent = '+ Novo usuário';
+    btnNovo.onclick = toggleFormUsuario;
     btnNovo.style.display = '';
   } else {
     btnNovo.style.display = 'none';
@@ -513,13 +567,17 @@ async function carregarTudo() {
   usuarios = usrs;
 
   const meu = usrs.find(u => u.usuario === usuarioLogado);
-  if (meu) usuarioLogadoId = meu.id;
+  if (meu) {
+    usuarioLogadoId   = meu.id;
+    usuarioLogadoRole = meu.role;
+  }
 
   document.getElementById('cfg-usuario-atual').textContent = usuarioLogado;
 
   preencherDropdowns();
   renderAgendamentos(ags);
   renderClientes(cls);
+  renderUsuarios(usrs);
 }
 
 // ── Dropdowns ─────────────────────────────────────────────────────────────
@@ -585,7 +643,7 @@ function renderAgendamentos(lista) {
             ${STATUS.map(s => `<option value="${s}"${s === a.status ? ' selected' : ''}>${s}</option>`).join('')}
           </select>
           <button class="btn btn-primary btn-sm" onclick="atualizarStatus(${a.id})">Salvar</button>
-          <button class="btn btn-danger  btn-sm" onclick="deletarAg(${a.id})">Deletar</button>
+          ${usuarioLogadoRole === 'ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deletarAg(${a.id})">Deletar</button>` : ''}
         </div>
       </td>
     </tr>
@@ -653,7 +711,7 @@ function renderClientes(lista) {
       <td>
         <div class="actions">
           <button class="btn btn-primary btn-sm" onclick="editarCliente(${c.id})">Editar</button>
-          <button class="btn btn-danger  btn-sm" onclick="deletarCl(${c.id})">Deletar</button>
+          ${usuarioLogadoRole === 'ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deletarCl(${c.id})">Deletar</button>` : ''}
         </div>
       </td>
     </tr>
@@ -734,6 +792,75 @@ async function recarregarClientes() {
   clientes = await api('/cliente');
   preencherDropdowns();
   renderClientes(clientes);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// USUÁRIOS
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderUsuarios(lista) {
+  const tbody = document.getElementById('tbody-usr');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty">Nenhum usuário cadastrado.</td></tr>';
+    return;
+  }
+  const isAdmin = usuarioLogadoRole === 'ADMIN';
+  tbody.innerHTML = lista.map(u => `
+    <tr>
+      <td>${u.id}</td>
+      <td>${esc(u.nome)}</td>
+      <td>${esc(u.usuario)}</td>
+      <td><span class="badge ${u.role === 'ADMIN' ? 'CONFIRMADO' : 'MARCADO'}">${u.role}</span></td>
+      <td>
+        ${isAdmin && u.id !== usuarioLogadoId ? `
+          <div class="actions">
+            <button class="btn btn-danger btn-sm" onclick="deletarUsr(${u.id}, '${esc(u.usuario)}')">Deletar</button>
+          </div>
+        ` : '—'}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleFormUsuario() {
+  const el = document.getElementById('form-usuario');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'none') {
+    ['usr-nome','usr-usuario','usr-senha'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('usr-role').value = 'EMPLOYEE';
+  }
+}
+
+async function criarUsuario() {
+  const nome    = document.getElementById('usr-nome').value.trim();
+  const usuario = document.getElementById('usr-usuario').value.trim();
+  const senha   = document.getElementById('usr-senha').value;
+  const role    = document.getElementById('usr-role').value;
+  if (!nome || !usuario || !senha) { toast('Preencha todos os campos obrigatórios.', true); return; }
+  try {
+    await api('/usuario/registrar', {
+      method: 'POST',
+      body: JSON.stringify({ nome, usuario, senha, role, ativo: true })
+    });
+    toast('Usuário criado!');
+    toggleFormUsuario();
+    await recarregarUsuarios();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function deletarUsr(id, nome) {
+  if (!confirm(`Deletar usuário "${nome}"?`)) return;
+  try {
+    await api(`/usuario/deletar/${id}`, { method: 'DELETE' });
+    toast('Usuário deletado.');
+    await recarregarUsuarios();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function recarregarUsuarios() {
+  usuarios = await api('/usuario');
+  preencherDropdowns();
+  renderUsuarios(usuarios);
 }
 
 // ══════════════════════════════════════════════════════════════════════════

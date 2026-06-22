@@ -22,13 +22,12 @@ public class UsuarioService {
 
     public List<UsuarioDtoResponse> getAllUsers() {
         return repository.findAll().stream()
-                .map(user -> new UsuarioDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo()))
+                .map(this::toResponse)
                 .toList();
     }
 
     public UsuarioDtoResponse getUserById(Long id) {
-        Usuario user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        return new UsuarioDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo());
+        return toResponse(repository.findById(id).orElseThrow(() -> new UserNotFoundException(id)));
     }
 
     public UsuarioDtoResponse insertUser(UsuarioDtoRequest dto) {
@@ -38,8 +37,7 @@ public class UsuarioService {
         user.setSenha(passwordEncoder.encode(dto.senha()));
         user.setRole(dto.role());
         user.setAtivo(true);
-        Usuario saved = repository.save(user);
-        return new UsuarioDtoResponse(saved.getId(), saved.getUsuario(), saved.getRole(), saved.getAtivo());
+        return toResponse(repository.save(user));
     }
     public void deleteUser(Long id){
         if (!repository.existsById(id)){
@@ -64,12 +62,12 @@ public class UsuarioService {
         }
         return toResponse(repository.save(usuario));
     }
-    private UsuarioDtoResponse toResponse(Usuario usuario){
+    private UsuarioDtoResponse toResponse(Usuario usuario) {
         return new UsuarioDtoResponse(
                 usuario.getId(),
+                usuario.getNome(),
                 usuario.getUsuario(),
                 usuario.getRole(),
                 usuario.getAtivo());
-
     }
 }
