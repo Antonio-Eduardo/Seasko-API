@@ -192,6 +192,7 @@
   .btn-danger  { background: var(--danger); color: #fff; }
   .btn-danger:hover { background: var(--danger-hov); }
   .btn-sm      { padding: 5px 10px; font-size: .8rem; }
+  .btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
@@ -460,7 +461,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="salvarEdicaoAgendamento()">Salvar</button>
+        <button class="btn btn-primary" onclick="salvarEdicaoAgendamento(this)">Salvar</button>
         <button class="btn btn-ghost"   onclick="fecharEdicaoAgendamento()">Cancelar</button>
       </div>
     </div>
@@ -498,7 +499,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="criarAgendamento()">Salvar</button>
+        <button class="btn btn-primary" onclick="criarAgendamento(this)">Salvar</button>
         <button class="btn btn-ghost"   onclick="toggleForm()">Cancelar</button>
       </div>
     </div>
@@ -549,7 +550,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="criarCliente()">Salvar</button>
+        <button class="btn btn-primary" onclick="criarCliente(this)">Salvar</button>
         <button class="btn btn-ghost"   onclick="toggleFormCliente()">Cancelar</button>
       </div>
     </div>
@@ -605,7 +606,7 @@
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="criarUsuario()">Salvar</button>
+        <button class="btn btn-primary" onclick="criarUsuario(this)">Salvar</button>
         <button class="btn btn-ghost"   onclick="toggleFormUsuario()">Cancelar</button>
       </div>
     </div>
@@ -643,7 +644,7 @@
         <small>Login atual: <strong id="cfg-usuario-atual"></strong></small>
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="salvarUsuario()">Salvar</button>
+        <button class="btn btn-primary" onclick="salvarUsuario(this)">Salvar</button>
       </div>
     </div>
 
@@ -658,7 +659,7 @@
         <input id="cfg-senha2" type="password" autocomplete="new-password" />
       </div>
       <div class="form-actions">
-        <button class="btn btn-primary" onclick="salvarSenha()">Salvar</button>
+        <button class="btn btn-primary" onclick="salvarSenha(this)">Salvar</button>
       </div>
     </div>
   </div>
@@ -914,8 +915,9 @@ function fecharEdicaoAgendamento() {
   document.getElementById('form-editar-agendamento').style.display = 'none';
 }
 
-async function salvarEdicaoAgendamento() {
+async function salvarEdicaoAgendamento(btn) {
   if (!agendamentoEditandoId) return;
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   const body = {
     clientId:    Number(document.getElementById('fe-cliente').value),
     userId:      Number(document.getElementById('fe-usuario').value),
@@ -932,9 +934,10 @@ async function salvarEdicaoAgendamento() {
     fecharEdicaoAgendamento();
     await recarregarAgendamentos();
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
-async function criarAgendamento() {
+async function criarAgendamento(btn) {
   const body = {
     clientId:    Number(document.getElementById('f-cliente').value),
     userId:      Number(document.getElementById('f-usuario').value),
@@ -944,12 +947,14 @@ async function criarAgendamento() {
     descricao:   document.getElementById('f-descricao').value || null,
     anotacao:    document.getElementById('f-anotacao').value  || null
   };
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api('/agendamento/inserir', { method: 'POST', body: JSON.stringify(body) });
     toast('Agendamento criado!');
     toggleForm();
     await recarregarAgendamentos();
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
 async function atualizarStatus(id) {
@@ -1007,19 +1012,21 @@ function toggleFormCliente() {
   }
 }
 
-async function criarCliente() {
+async function criarCliente(btn) {
   const body = {
     nome:     document.getElementById('c-nome').value.trim(),
     telefone: document.getElementById('c-telefone').value.trim() || null,
     anotacao: document.getElementById('c-anotacao').value.trim() || null
   };
   if (!body.nome) { toast('Nome é obrigatório.', true); return; }
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api('/cliente/inserir', { method: 'POST', body: JSON.stringify(body) });
     toast('Cliente criado!');
     toggleFormCliente();
     await recarregarClientes();
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
 function editarCliente(id) {
@@ -1048,6 +1055,7 @@ async function salvarCliente(id) {
     anotacao: document.getElementById(`e-anot-${id}`).value.trim() || null
   };
   if (!body.nome) { toast('Nome é obrigatório.', true); return; }
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api(`/cliente/atualizar/${id}`, { method: 'PUT', body: JSON.stringify(body) });
     toast('Cliente atualizado!');
@@ -1116,12 +1124,13 @@ function toggleFormUsuario() {
   }
 }
 
-async function criarUsuario() {
+async function criarUsuario(btn) {
   const nome    = document.getElementById('usr-nome').value.trim();
   const usuario = document.getElementById('usr-usuario').value.trim();
   const senha   = document.getElementById('usr-senha').value;
   const role    = document.getElementById('usr-role').value;
   if (!nome || !usuario || !senha) { toast('Preencha todos os campos obrigatórios.', true); return; }
+  const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api('/usuario/registrar', {
       method: 'POST',
@@ -1131,6 +1140,7 @@ async function criarUsuario() {
     toggleFormUsuario();
     await recarregarUsuarios();
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
 async function deletarUsr(id, nome) {
@@ -1153,12 +1163,13 @@ async function recarregarUsuarios() {
 // CONFIGURAÇÕES
 // ══════════════════════════════════════════════════════════════════════════
 
-async function salvarUsuario() {
+async function salvarUsuario(btn) {
   const novoUsuario = document.getElementById('cfg-usuario').value.trim();
   if (!novoUsuario) { toast('Digite o novo nome de usuário.', true); return; }
   if (novoUsuario === usuarioLogado) { toast('É o mesmo nome de usuário atual.', true); return; }
   if (!usuarioLogadoId)  { toast('ID do usuário não encontrado.', true); return; }
 
+   const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api(`/usuario/atualizar/${usuarioLogadoId}`, {
       method: 'PUT',
@@ -1170,15 +1181,17 @@ async function salvarUsuario() {
     document.getElementById('cfg-usuario').value = '';
     toast('Nome de usuário atualizado!');
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
-async function salvarSenha() {
+async function salvarSenha(btn) {
   const nova   = document.getElementById('cfg-senha').value;
   const nova2  = document.getElementById('cfg-senha2').value;
   if (!nova)         { toast('Digite a nova senha.', true); return; }
   if (nova !== nova2){ toast('As senhas não coincidem.', true); return; }
   if (!usuarioLogadoId) { toast('ID do usuário não encontrado.', true); return; }
 
+   const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
     await api(`/usuario/atualizar/${usuarioLogadoId}`, {
       method: 'PUT',
@@ -1189,6 +1202,7 @@ async function salvarSenha() {
     document.getElementById('cfg-senha2').value = '';
     toast('Senha atualizada! Use a nova senha no próximo login.');
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
 // Extrai a senha atual do header Basic para recompor auth após trocar usuário
