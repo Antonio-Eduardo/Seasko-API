@@ -195,27 +195,64 @@
 
   /* ── Table ── */
   .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  table { width: 100%; border-collapse: collapse; font-size: .875rem; }
   th {
-    text-align: left; padding: 10px 14px; font-size: .72rem;
-    text-transform: uppercase; letter-spacing: .05em;
-    color: var(--color-muted); border-bottom: 1px solid var(--border-light); white-space: nowrap;
+    text-align: left; padding: 10px 14px; font-size: .7rem;
+    text-transform: uppercase; letter-spacing: .06em; font-weight: 600;
+    color: var(--color-muted); border-bottom: 2px solid var(--border-light);
+    white-space: nowrap; background: var(--bg-card);
   }
-  td { padding: 10px 14px; border-bottom: 1px solid var(--border-row); vertical-align: middle; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border-row); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: var(--bg-hover); }
-  .empty { text-align: center; color: var(--color-muted); padding: 40px 0; }
+  tbody tr:nth-child(even) td { background: var(--bg-page); }
+  tbody tr:hover td { background: var(--primary-soft) !important; transition: background .1s; }
+
+  /* Larguras fixas por tipo de coluna */
+  .col-id      { width: 48px;  }
+  .col-data    { width: 100px; white-space: nowrap; }
+  .col-hora    { width: 110px; white-space: nowrap; }
+  .col-status  { width: 140px; }
+  .col-acoes   { width: 220px; white-space: nowrap; }
+  .col-role    { width: 100px; }
+
+  .empty { text-align: center; color: var(--color-muted); padding: 48px 0; font-size: .875rem; }
 
   /* ── Status badge ── */
   .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 999px;
-    font-size: .75rem; font-weight: 700; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: .72rem; font-weight: 600; white-space: nowrap; letter-spacing: .02em;
+  }
+  .badge::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
   }
   .MARCADO      { background: #dbeafe; color: #1d4ed8; }
+  .MARCADO::before      { background: #1d4ed8; }
   .CONFIRMADO   { background: #dcfce7; color: #15803d; }
+  .CONFIRMADO::before   { background: #15803d; }
   .CANCELADO    { background: #fee2e2; color: #b91c1c; }
+  .CANCELADO::before    { background: #b91c1c; }
   .CONCLUIDO    { background: #f1f5f9; color: #475569; }
+  .CONCLUIDO::before    { background: #475569; }
   .NAO_APARECEU { background: #fef9c3; color: #a16207; }
+  .NAO_APARECEU::before { background: #a16207; }
+
+  /* ── Skeleton loading ── */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+  }
+  .skeleton-row td {
+    padding: 14px 14px;
+    border-bottom: 1px solid var(--border-row);
+  }
+  .skeleton-line {
+    height: 12px; border-radius: 4px;
+    background: linear-gradient(90deg, var(--border-light) 25%, var(--bg-hover) 50%, var(--border-light) 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
 
   /* ── Row actions ── */
   .actions { display: flex; gap: 6px; align-items: center; }
@@ -261,16 +298,21 @@
   #modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 
   /* ── Toast ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
   #toast {
     position: fixed; bottom: 24px; right: 24px;
-    padding: 12px 20px; border-radius: 8px;
+    padding: 12px 20px; border-radius: var(--radius);
     font-size: .875rem; font-weight: 500;
-    color: #fff; background: #1f2937;
+    color: #fff; background: #1e293b;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
     opacity: 0; pointer-events: none;
-    transition: opacity .25s; z-index: 999;
+    transition: opacity .2s; z-index: 999;
   }
-  #toast.show { opacity: 1; }
-  #toast.err  { background: #dc2626; }
+  #toast.show { opacity: 1; animation: slideUp .2s ease; }
+  #toast.err  { background: var(--danger); }
 </style>
 </head>
 <body>
@@ -466,8 +508,14 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>Data</th><th>Horário</th><th>Cliente</th>
-              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Atualizar Status</th><th>Ações</th>
+              <th class="col-id">#</th>
+              <th class="col-data">Data</th>
+              <th class="col-hora">Horário</th>
+              <th>Cliente</th>
+              <th>Usuário</th>
+              <th>Descrição</th>
+              <th class="col-status">Status</th>
+              <th class="col-acoes">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-ag">
@@ -511,8 +559,12 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>Nome</th><th>Telefone</th>
-              <th>Anotação</th><th>Criado em</th><th>Ações</th>
+              <th class="col-id">#</th>
+              <th>Nome</th>
+              <th class="col-hora">Telefone</th>
+              <th>Anotação</th>
+              <th class="col-data">Criado em</th>
+              <th class="col-acoes">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-cl">
@@ -563,7 +615,11 @@
         <table>
           <thead>
             <tr>
-              <th>#</th><th>Nome</th><th>Usuário</th><th>Role</th><th>Ações</th>
+              <th class="col-id">#</th>
+              <th>Nome</th>
+              <th>Usuário</th>
+              <th class="col-role">Role</th>
+              <th class="col-acoes">Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-usr">
@@ -722,7 +778,7 @@ async function api(path, opts = {}) {
 
 // ── Carregar tudo ─────────────────────────────────────────────────────────
 async function carregarTudo() {
-  setLoading('tbody-ag', 9);
+  setLoading('tbody-ag', 8);
   setLoading('tbody-cl', 6);
   setLoading('tbody-usr', 5);
   const [ags, cls, usrs] = await Promise.all([
@@ -774,7 +830,7 @@ async function aplicarFiltros() {
   if (usr)    params.set('usuarioId', usr);
   if (status) params.set('status',    status);
   try {
-    setLoading('tbody-ag', 9);
+    setLoading('tbody-ag', 8);
     const qs = params.toString();
     renderAgendamentos(await api('/agendamento' + (qs ? '?' + qs : '')));
   } catch (e) { toast(e.message, true); }
@@ -795,31 +851,27 @@ function renderAgendamentos(lista) {
   agendamentosCache = lista;
   const tbody = document.getElementById('tbody-ag');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum agendamento.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum agendamento.</td></tr>';
     return;
   }
   const isAdmin = usuarioLogadoRole === 'ADMIN';
   tbody.innerHTML = lista.map(a => `
     <tr id="ag-row-${a.id}">
-      <td>${a.id}</td>
-      <td>${fmtData(a.dataMarcada)}</td>
-      <td>${fmtHora(a.horaInicio)} – ${fmtHora(a.horaFim)}</td>
-      <td>${nomeCliente(a.clientId)}</td>
-      <td>${nomeUsuario(a.userId)}</td>
-      <td>${esc(a.descricao ?? '—')}</td>
-      <td><span class="badge ${a.status}">${a.status}</span></td>
-      <td>
+      <td class="col-id" style="color:var(--color-muted);font-size:.8rem">${a.id}</td>
+      <td class="col-data">${fmtData(a.dataMarcada)}</td>
+      <td class="col-hora" style="color:var(--color-sub)">${fmtHora(a.horaInicio)} – ${fmtHora(a.horaFim)}</td>
+      <td><strong style="font-weight:500">${nomeCliente(a.clientId)}</strong></td>
+      <td style="color:var(--color-sub)">${nomeUsuario(a.userId)}</td>
+      <td style="color:var(--color-sub);font-size:.85rem">${esc(a.descricao ?? '—')}</td>
+      <td class="col-status"><span class="badge ${a.status}">${a.status}</span></td>
+      <td class="col-acoes">
         <div class="actions">
-          <select id="sel-${a.id}">
+          <select id="sel-${a.id}" style="max-width:130px">
             ${STATUS.map(s => `<option value="${s}"${s === a.status ? ' selected' : ''}>${s}</option>`).join('')}
           </select>
           <button class="btn btn-primary btn-sm" onclick="atualizarStatus(${a.id})">OK</button>
-        </div>
-      </td>
-      <td>
-        <div class="actions">
           <button class="btn btn-ghost btn-sm" onclick="editarAgendamento(${a.id})">Editar</button>
-          ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deletarAg(${a.id})">Deletar</button>` : ''}
+          ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deletarAg(${a.id})">Del</button>` : ''}
         </div>
       </td>
     </tr>
@@ -1016,7 +1068,7 @@ async function deletarCl(id) {
 }
 
 async function recarregarAgendamentos() {
-  setLoading('tbody-ag', 9);
+  setLoading('tbody-ag', 8);
   renderAgendamentos(await api('/agendamento'));
 }
 
@@ -1223,10 +1275,17 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
     document.getElementById('modal-cancel').click();
 });
 
-// ── Loading nas tabelas ───────────────────────────────────────────────────
+// ── Skeleton loading ──────────────────────────────────────────────────────
 function setLoading(tbodyId, colspan) {
-  document.getElementById(tbodyId).innerHTML =
-    `<tr><td colspan="${colspan}" class="empty" style="color:var(--color-muted)">Carregando…</td></tr>`;
+  const widths = ['40%','70%','55%','65%','45%','60%','50%'];
+  const rows = Array.from({ length: 5 }, () => `
+    <tr class="skeleton-row">
+      ${Array.from({ length: colspan }, (_, i) => `
+        <td><div class="skeleton-line" style="width:${widths[i % widths.length]}"></div></td>
+      `).join('')}
+    </tr>
+  `).join('');
+  document.getElementById(tbodyId).innerHTML = rows;
 }
 </script>
 </body>
