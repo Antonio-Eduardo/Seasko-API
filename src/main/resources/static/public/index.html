@@ -217,6 +217,7 @@
     <h1>Agilo</h1>
     <div style="display:flex;gap:8px;align-items:center">
       <button id="dark-toggle" onclick="toggleDark()">Dark mode</button>
+      <button class="btn btn-ghost" onclick="logout()">Sair</button>
       <button class="btn btn-primary" id="btn-novo" onclick="toggleForm()">+ Novo agendamento</button>
     </div>
   </header>
@@ -281,6 +282,54 @@
       </div>
     </div>
 
+    <div class="card" id="form-editar-agendamento" style="display:none">
+      <div class="card-title">Editar agendamento</div>
+      <div class="grid">
+        <div class="field">
+          <label>Cliente</label>
+          <select id="fe-cliente"></select>
+        </div>
+        <div class="field">
+          <label>Usuário</label>
+          <select id="fe-usuario"></select>
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input id="fe-data" type="date" />
+        </div>
+        <div class="field">
+          <label>Hora início</label>
+          <input id="fe-inicio" type="time" />
+        </div>
+        <div class="field">
+          <label>Hora fim</label>
+          <input id="fe-fim" type="time" />
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="fe-status">
+            <option value="MARCADO">MARCADO</option>
+            <option value="CONFIRMADO">CONFIRMADO</option>
+            <option value="CANCELADO">CANCELADO</option>
+            <option value="CONCLUIDO">CONCLUIDO</option>
+            <option value="NAO_APARECEU">NAO_APARECEU</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input id="fe-descricao" type="text" />
+        </div>
+        <div class="field span2">
+          <label>Anotação</label>
+          <textarea id="fe-anotacao"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="salvarEdicaoAgendamento()">Salvar</button>
+        <button class="btn btn-ghost"   onclick="fecharEdicaoAgendamento()">Cancelar</button>
+      </div>
+    </div>
+
     <div class="card" id="form-agendamento" style="display:none">
       <div class="card-title">Novo agendamento</div>
       <div class="grid">
@@ -325,7 +374,7 @@
           <thead>
             <tr>
               <th>#</th><th>Data</th><th>Horário</th><th>Cliente</th>
-              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Ações</th>
+              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Status rápido</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-ag">
@@ -479,12 +528,13 @@ function toggleDark() {
 }
 
 // ── Estado ────────────────────────────────────────────────────────────────
-let auth             = '';
-let usuarioLogado    = '';
-let usuarioLogadoId  = null;
+let auth              = '';
+let usuarioLogado     = '';
+let usuarioLogadoId   = null;
 let usuarioLogadoRole = '';
-let clientes         = [];
-let usuarios         = [];
+let clientes          = [];
+let usuarios          = [];
+let agendamentosCache = [];
 
 const STATUS = ['MARCADO','CONFIRMADO','CANCELADO','CONCLUIDO','NAO_APARECEU'];
 
@@ -515,6 +565,21 @@ async function login() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') login();
 });
+
+function logout() {
+  auth              = '';
+  usuarioLogado     = '';
+  usuarioLogadoId   = null;
+  usuarioLogadoRole = '';
+  clientes          = [];
+  usuarios          = [];
+  document.getElementById('u').value = '';
+  document.getElementById('p').value = '';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('app').style.display              = 'none';
+  document.getElementById('login').style.display            = 'flex';
+  document.getElementById('dark-toggle-login').style.display = '';
+}
 
 // ── Abas ──────────────────────────────────────────────────────────────────
 function mudarAba(aba) {
@@ -622,27 +687,34 @@ function limparFiltros() {
 // ══════════════════════════════════════════════════════════════════════════
 
 function renderAgendamentos(lista) {
+  agendamentosCache = lista;
   const tbody = document.getElementById('tbody-ag');
   if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum agendamento.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum agendamento.</td></tr>';
     return;
   }
+  const isAdmin = usuarioLogadoRole === 'ADMIN';
   tbody.innerHTML = lista.map(a => `
-    <tr>
+    <tr id="ag-row-${a.id}">
       <td>${a.id}</td>
       <td>${fmtData(a.dataMarcada)}</td>
       <td>${fmtHora(a.horaInicio)} – ${fmtHora(a.horaFim)}</td>
       <td>${nomeCliente(a.clientId)}</td>
       <td>${nomeUsuario(a.userId)}</td>
-      <td>${a.descricao ?? '—'}</td>
+      <td>${esc(a.descricao ?? '—')}</td>
       <td><span class="badge ${a.status}">${a.status}</span></td>
       <td>
         <div class="actions">
           <select id="sel-${a.id}">
             ${STATUS.map(s => `<option value="${s}"${s === a.status ? ' selected' : ''}>${s}</option>`).join('')}
           </select>
-          <button class="btn btn-primary btn-sm" onclick="atualizarStatus(${a.id})">Salvar</button>
-          ${usuarioLogadoRole === 'ADMIN' ? `<button class="btn btn-danger btn-sm" onclick="deletarAg(${a.id})">Deletar</button>` : ''}
+          <button class="btn btn-primary btn-sm" onclick="atualizarStatus(${a.id})">OK</button>
+        </div>
+      </td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" onclick="editarAgendamento(${a.id})">Editar</button>
+          ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deletarAg(${a.id})">Deletar</button>` : ''}
         </div>
       </td>
     </tr>
@@ -652,6 +724,57 @@ function renderAgendamentos(lista) {
 function toggleForm() {
   const el = document.getElementById('form-agendamento');
   el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+let agendamentoEditandoId = null;
+
+function editarAgendamento(id) {
+  const ag = agendamentosCache.find(a => a.id === id);
+  if (!ag) return;
+  agendamentoEditandoId = id;
+
+  const optsCli = clientes.map(c => `<option value="${c.id}"${c.id === ag.clientId ? ' selected' : ''}>${esc(c.nome)}</option>`).join('');
+  const optsUsr = usuarios.map(u => `<option value="${u.id}"${u.id === ag.userId   ? ' selected' : ''}>${esc(u.usuario)}</option>`).join('');
+  document.getElementById('fe-cliente').innerHTML = optsCli;
+  document.getElementById('fe-usuario').innerHTML = optsUsr;
+
+  document.getElementById('fe-data').value     = Array.isArray(ag.dataMarcada)
+    ? `${ag.dataMarcada[0]}-${pad(ag.dataMarcada[1])}-${pad(ag.dataMarcada[2])}`
+    : ag.dataMarcada;
+  document.getElementById('fe-inicio').value   = fmtHora(ag.horaInicio);
+  document.getElementById('fe-fim').value      = fmtHora(ag.horaFim);
+  document.getElementById('fe-status').value   = ag.status;
+  document.getElementById('fe-descricao').value = ag.descricao ?? '';
+  document.getElementById('fe-anotacao').value  = ag.anotacao  ?? '';
+
+  document.getElementById('form-editar-agendamento').style.display = 'block';
+  document.getElementById('form-agendamento').style.display        = 'none';
+  document.getElementById('form-editar-agendamento').scrollIntoView({ behavior: 'smooth' });
+}
+
+function fecharEdicaoAgendamento() {
+  agendamentoEditandoId = null;
+  document.getElementById('form-editar-agendamento').style.display = 'none';
+}
+
+async function salvarEdicaoAgendamento() {
+  if (!agendamentoEditandoId) return;
+  const body = {
+    clientId:    Number(document.getElementById('fe-cliente').value),
+    userId:      Number(document.getElementById('fe-usuario').value),
+    dataMarcada: document.getElementById('fe-data').value,
+    horaInicio:  toTime(document.getElementById('fe-inicio').value),
+    horaFim:     toTime(document.getElementById('fe-fim').value),
+    status:      document.getElementById('fe-status').value,
+    descricao:   document.getElementById('fe-descricao').value || null,
+    anotacao:    document.getElementById('fe-anotacao').value  || null
+  };
+  try {
+    await api(`/agendamento/atualizar/${agendamentoEditandoId}`, { method: 'PUT', body: JSON.stringify(body) });
+    toast('Agendamento atualizado!');
+    fecharEdicaoAgendamento();
+    await recarregarAgendamentos();
+  } catch (e) { toast(e.message, true); }
 }
 
 async function criarAgendamento() {
@@ -668,7 +791,7 @@ async function criarAgendamento() {
     await api('/agendamento/inserir', { method: 'POST', body: JSON.stringify(body) });
     toast('Agendamento criado!');
     toggleForm();
-    renderAgendamentos(await api('/agendamento'));
+    await recarregarAgendamentos();
   } catch (e) { toast(e.message, true); }
 }
 
@@ -677,7 +800,7 @@ async function atualizarStatus(id) {
   try {
     await api(`/agendamento/status/${id}`, { method: 'PUT', body: JSON.stringify(status) });
     toast('Status atualizado!');
-    renderAgendamentos(await api('/agendamento'));
+    await recarregarAgendamentos();
   } catch (e) { toast(e.message, true); }
 }
 
@@ -686,7 +809,7 @@ async function deletarAg(id) {
   try {
     await api(`/agendamento/deletar/${id}`, { method: 'DELETE' });
     toast('Agendamento deletado.');
-    renderAgendamentos(await api('/agendamento'));
+    await recarregarAgendamentos();
   } catch (e) { toast(e.message, true); }
 }
 
@@ -785,6 +908,10 @@ async function deletarCl(id) {
     toast('Cliente deletado.');
     await recarregarClientes();
   } catch (e) { toast(e.message, true); }
+}
+
+async function recarregarAgendamentos() {
+  renderAgendamentos(await api('/agendamento'));
 }
 
 async function recarregarClientes() {

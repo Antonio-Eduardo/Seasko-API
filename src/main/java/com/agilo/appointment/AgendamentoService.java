@@ -82,15 +82,19 @@ public class AgendamentoService {
     public AgendamentoDtoResponse updateAppointment(Long id, AgendamentoDtoRequest dto) {
         Agendamento appointment = findOrThrow(id);
 
+        Cliente client = clientRepository.findById(dto.clientId())
+                .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
         Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
+        appointment.setClient(client);
         appointment.setUser(user);
-        appointment.setAnotacao(dto.anotacao());
-        appointment.setDescricao(dto.descricao());
         appointment.setDataMarcada(dto.dataMarcada());
         appointment.setHoraInicio(dto.horaInicio());
         appointment.setHoraFim(dto.horaFim());
+        appointment.setDescricao(dto.descricao());
+        appointment.setAnotacao(dto.anotacao());
+        if (dto.status() != null) appointment.setStatus(dto.status());
 
         return toResponse(appointmentRepository.save(appointment));
     }

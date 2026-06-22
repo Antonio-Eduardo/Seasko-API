@@ -24,6 +24,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.domain.Specification;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,15 +82,11 @@ class AgendamentoServiceTest {
 
     @Test
     void getAllAppointments_returnsMappedList() {
-        when(appointmentRepository.findAll()).thenReturn(List.of(agendamento));
+        when(appointmentRepository.findAll(any(Specification.class)))
+                .thenReturn(List.of(agendamento));
 
         List<AgendamentoDtoResponse> result = service.getAllAppointments(
-                null,
-                0,
-                10,
-                null,
-                null,
-                null
+                null, null, null, null, null, null
         );
 
         assertThat(result).hasSize(1);
@@ -100,14 +98,10 @@ class AgendamentoServiceTest {
 
     @Test
     void getAllAppointments_emptyRepository_returnsEmptyList() {
-        when(appointmentRepository.findAll()).thenReturn(List.of());
+        when(appointmentRepository.findAll(any(Specification.class)))
+                .thenReturn(List.of());
 
-        assertThat(service.getAllAppointments( null,
-                0,
-                10,
-                null,
-                null,
-                null)).isEmpty();
+        assertThat(service.getAllAppointments(null, null, null, null, null, null)).isEmpty();
     }
 
     @Test
@@ -136,7 +130,7 @@ class AgendamentoServiceTest {
                 LocalDate.of(2026, 7, 1),
                 LocalTime.of(9, 0),
                 LocalTime.of(10, 0),
-                1L, 1L, "Corte", ""
+                1L, 1L, null, "Corte", ""
         );
         when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(1L)).thenReturn(Optional.of(usuario));
@@ -161,7 +155,7 @@ class AgendamentoServiceTest {
                 LocalDate.of(2026, 7, 1),
                 LocalTime.of(9, 0),
                 LocalTime.of(10, 0),
-                99L, 1L, "Corte", ""
+                99L, 1L, null, "Corte", ""
         );
         when(clientRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -178,7 +172,7 @@ class AgendamentoServiceTest {
                 LocalDate.of(2026, 7, 1),
                 LocalTime.of(9, 0),
                 LocalTime.of(10, 0),
-                1L, 99L, "Corte", ""
+                1L, 99L, null, "Corte", ""
         );
         when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
@@ -191,14 +185,15 @@ class AgendamentoServiceTest {
     }
 
     @Test
-    void updateAppointment_found_updatesFieldsButNotClient() {
+    void updateAppointment_found_updatesFields() {
         AgendamentoDtoRequest dto = new AgendamentoDtoRequest(
                 LocalDate.of(2026, 8, 1),
                 LocalTime.of(14, 0),
                 LocalTime.of(15, 0),
-                1L, 1L, "Coloração", "observação"
+                1L, 1L, AgendamentoStatus.CONFIRMADO, "Coloração", "observação"
         );
         when(appointmentRepository.findById(1L)).thenReturn(Optional.of(agendamento));
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(appointmentRepository.save(any(Agendamento.class))).thenReturn(agendamento);
 
@@ -220,7 +215,7 @@ class AgendamentoServiceTest {
                 LocalDate.of(2026, 7, 1),
                 LocalTime.of(9, 0),
                 LocalTime.of(10, 0),
-                1L, 1L, "Corte", ""
+                1L, 1L, null, "Corte", ""
         );
         when(appointmentRepository.findById(99L)).thenReturn(Optional.empty());
 
