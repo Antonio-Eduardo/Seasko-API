@@ -1,4 +1,4 @@
-﻿package com.agilo.client;
+package com.agilo.client;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

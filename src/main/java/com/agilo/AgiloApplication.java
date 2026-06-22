@@ -1,4 +1,4 @@
-﻿package com.agilo;
+package com.agilo;
 
 import com.agilo.user.Usuario;
 import com.agilo.user.UsuarioRepository;

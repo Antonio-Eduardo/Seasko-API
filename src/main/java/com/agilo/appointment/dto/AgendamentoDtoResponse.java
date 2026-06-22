@@ -1,4 +1,4 @@
-﻿package com.agilo.appointment.dto;
+package com.agilo.appointment.dto;
 
 import com.agilo.appointment.AgendamentoStatus;
 import java.time.LocalDate;

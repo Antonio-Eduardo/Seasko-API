@@ -1,4 +1,4 @@
-﻿package com.agilo.user;
+package com.agilo.user;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

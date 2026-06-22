@@ -1,4 +1,4 @@
-﻿package com.agilo.appointment;
+package com.agilo.appointment;
 
 public enum AgendamentoStatus {
     MARCADO,

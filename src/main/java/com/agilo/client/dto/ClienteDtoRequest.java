@@ -1,4 +1,4 @@
-﻿package com.agilo.client.dto;
+package com.agilo.client.dto;
 
 public record ClienteDtoRequest(
         String nome,

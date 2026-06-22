@@ -1,4 +1,4 @@
-﻿package com.agilo.user.dto;
+package com.agilo.user.dto;
 
 import com.agilo.user.UsuarioRole;
 

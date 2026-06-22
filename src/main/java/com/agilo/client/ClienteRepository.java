@@ -1,4 +1,4 @@
-﻿package com.agilo.client;
+package com.agilo.client;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,4 +1,4 @@
-﻿package com.agilo.exception;
+package com.agilo.exception;
 
 public class UserNotFoundException extends NotFoundException {
     public UserNotFoundException(Long id) {

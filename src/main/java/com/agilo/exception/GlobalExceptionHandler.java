@@ -1,4 +1,4 @@
-﻿package com.agilo.exception;
+package com.agilo.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-﻿package com.agilo.exception;
+package com.agilo.exception;
 
 public class AppointmentNotFoundException extends NotFoundException {
     public AppointmentNotFoundException(Long id) {

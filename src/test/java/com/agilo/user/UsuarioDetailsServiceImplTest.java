@@ -1,4 +1,4 @@
-﻿package com.agilo.user;
+package com.agilo.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

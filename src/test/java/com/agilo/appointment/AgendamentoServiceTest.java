@@ -1,4 +1,4 @@
-﻿package com.agilo.appointment;
+package com.agilo.appointment;
 
 import com.agilo.appointment.dto.AgendamentoDtoRequest;
 import com.agilo.appointment.dto.AgendamentoDtoResponse;
