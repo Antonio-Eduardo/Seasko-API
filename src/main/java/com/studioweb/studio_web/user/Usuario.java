@@ -12,11 +12,11 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "tb_usuario")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements UserDetails {
+public class Usuario implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private String senha;
 
     @Enumerated(EnumType.STRING)
-    private UserRole role;
+    private UsuarioRole role;
     private Boolean ativo;
 
     @Override

@@ -1,7 +1,7 @@
 package com.studioweb.studio_web.client;
 
-import com.studioweb.studio_web.client.dto.ClientDtoRequest;
-import com.studioweb.studio_web.client.dto.ClientDtoResponse;
+import com.studioweb.studio_web.client.dto.ClienteDtoRequest;
+import com.studioweb.studio_web.client.dto.ClienteDtoResponse;
 import com.studioweb.studio_web.exception.ClientNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -9,28 +9,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class ClientService {
+public class ClienteService {
 
-    private final ClientRepository repository;
+    private final ClienteRepository repository;
 
-    public ClientService(ClientRepository repository) {
+    public ClienteService(ClienteRepository repository) {
         this.repository = repository;
     }
 
-    public List<ClientDtoResponse> getAllClients() {
+    public List<ClienteDtoResponse> getAllClients() {
         return repository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public ClientDtoResponse getClientById(Long id) {
-        Client client = repository.findById(id)
+    public ClienteDtoResponse getClientById(Long id) {
+        Cliente client = repository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException(id));
         return toResponse(client);
     }
 
-    public ClientDtoResponse insertClient(ClientDtoRequest dto) {
-        Client client = new Client();
+    public ClienteDtoResponse insertClient(ClienteDtoRequest dto) {
+        Cliente client = new Cliente();
         client.setNome(dto.nome());
         client.setTelefone(dto.telefone());
         client.setAnotacao(dto.anotacao());
@@ -38,8 +38,8 @@ public class ClientService {
         return toResponse(repository.save(client));
     }
 
-    public ClientDtoResponse updateClient(Long id, ClientDtoRequest dto) {
-        Client client = repository.findById(id)
+    public ClienteDtoResponse updateClient(Long id, ClienteDtoRequest dto) {
+        Cliente client = repository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException(id));
         client.setNome(dto.nome());
         client.setTelefone(dto.telefone());
@@ -54,8 +54,8 @@ public class ClientService {
         repository.deleteById(id);
     }
 
-    private ClientDtoResponse toResponse(Client client) {
-        return new ClientDtoResponse(
+    private ClienteDtoResponse toResponse(Cliente client) {
+        return new ClienteDtoResponse(
                 client.getId(),
                 client.getNome(),
                 client.getTelefone(),

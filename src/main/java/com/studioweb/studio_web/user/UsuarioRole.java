@@ -1,5 +1,5 @@
 package com.studioweb.studio_web.user;
 
-public enum UserRole {
+public enum UsuarioRole {
     ADMIN, EMPLOYEE
 }

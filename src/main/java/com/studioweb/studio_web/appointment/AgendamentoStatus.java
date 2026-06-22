@@ -1,6 +1,6 @@
 package com.studioweb.studio_web.appointment;
 
-public enum AppointmentStatus {
+public enum AgendamentoStatus {
     MARCADO,
     CONFIRMADO,
     CANCELADO,

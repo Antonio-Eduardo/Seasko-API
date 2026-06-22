@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UserService {
+public class UsuarioService {
 
-    private final UserRepository repository;
+    private final UsuarioRepository repository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -26,18 +26,18 @@ public class UserService {
     }
 
     public UserDtoResponse getUserById(Long id) {
-        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        Usuario user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return new UserDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo());
     }
 
     public UserDtoResponse insertUser(UserDtoRequest dto) {
-        User user = new User();
+        Usuario user = new Usuario();
         user.setNome(dto.nome());
         user.setUsuario(dto.usuario());
         user.setSenha(passwordEncoder.encode(dto.senha()));
         user.setRole(dto.role());
         user.setAtivo(true);
-        User saved = repository.save(user);
+        Usuario saved = repository.save(user);
         return new UserDtoResponse(saved.getId(), saved.getUsuario(), saved.getRole(), saved.getAtivo());
     }
 }

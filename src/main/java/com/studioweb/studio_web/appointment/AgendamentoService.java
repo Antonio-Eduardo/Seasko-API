@@ -1,68 +1,69 @@
 package com.studioweb.studio_web.appointment;
 
-import com.studioweb.studio_web.appointment.dto.AppointmentDtoRequest;
-import com.studioweb.studio_web.appointment.dto.AppointmentDtoResponse;
-import com.studioweb.studio_web.client.Client;
-import com.studioweb.studio_web.client.ClientRepository;
+import com.studioweb.studio_web.appointment.dto.AgendamentoDtoRequest;
+import com.studioweb.studio_web.appointment.dto.AgendamentoDtoResponse;
+import com.studioweb.studio_web.client.Cliente;
+import com.studioweb.studio_web.client.ClienteRepository;
 import com.studioweb.studio_web.exception.AppointmentNotFoundException;
 import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
-import com.studioweb.studio_web.user.User;
-import com.studioweb.studio_web.user.UserRepository;
+import com.studioweb.studio_web.user.Usuario;
+import com.studioweb.studio_web.user.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class AppointmentService {
+public class AgendamentoService {
 
-    private final AppointmentRepository appointmentRepository;
-    private final ClientRepository clientRepository;
-    private final UserRepository userRepository;
+    private final AgendamentoRepository appointmentRepository;
+    private final ClienteRepository clientRepository;
+    private final UsuarioRepository userRepository;
 
-    public AppointmentService(AppointmentRepository appointmentRepository,
-                              ClientRepository clientRepository,
-                              UserRepository userRepository) {
+    public AgendamentoService(AgendamentoRepository appointmentRepository,
+                              ClienteRepository clientRepository,
+                              UsuarioRepository userRepository) {
         this.appointmentRepository = appointmentRepository;
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
     }
 
-    public List<AppointmentDtoResponse> getAllAppointments() {
+    public List<AgendamentoDtoResponse> getAllAppointments() {
         return appointmentRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public AppointmentDtoResponse getAppointmentById(Long id) {
+    public AgendamentoDtoResponse getAppointmentById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
-    public AppointmentDtoResponse insertAppointment(AppointmentDtoRequest dto) {
-        Client client = clientRepository.findById(dto.clientId())
+    public AgendamentoDtoResponse insertAppointment(AgendamentoDtoRequest dto) {
+        Cliente client = clientRepository.findById(dto.clientId())
                 .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
-        User user = userRepository.findById(dto.userId())
+        Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
-        Appointment appointment = new Appointment();
+        Agendamento appointment = new Agendamento();
         appointment.setClient(client);
         appointment.setUser(user);
         appointment.setDescricao(dto.descricao());
         appointment.setDataMarcada(dto.dataMarcada());
         appointment.setHoraInicio(dto.horaInicio());
-        appointment.setStatus(AppointmentStatus.MARCADO);
+        appointment.setHoraFim(dto.horaFim());
+        appointment.setStatus(AgendamentoStatus.MARCADO);
         appointment.setCriadoEm(LocalDateTime.now());
 
         return toResponse(appointmentRepository.save(appointment));
     }
 
-    public AppointmentDtoResponse updateAppointment(Long id, AppointmentDtoRequest dto) {
-        Appointment appointment = findOrThrow(id);
+    public AgendamentoDtoResponse updateAppointment(Long id, AgendamentoDtoRequest dto) {
+        Agendamento appointment = findOrThrow(id);
 
-        Client client = clientRepository.findById(dto.clientId())
+        Cliente client = clientRepository.findById(dto.clientId())
                 .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
-        User user = userRepository.findById(dto.userId())
+        Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
         appointment.setClient(client);
@@ -70,12 +71,13 @@ public class AppointmentService {
         appointment.setDescricao(dto.descricao());
         appointment.setDataMarcada(dto.dataMarcada());
         appointment.setHoraInicio(dto.horaInicio());
+        appointment.setHoraFim(dto.horaFim());
 
         return toResponse(appointmentRepository.save(appointment));
     }
 
-    public AppointmentDtoResponse updateStatus(Long id, AppointmentStatus status) {
-        Appointment appointment = findOrThrow(id);
+    public AgendamentoDtoResponse updateStatus(Long id, AgendamentoStatus status) {
+        Agendamento appointment = findOrThrow(id);
         appointment.setStatus(status);
         return toResponse(appointmentRepository.save(appointment));
     }
@@ -87,13 +89,13 @@ public class AppointmentService {
         appointmentRepository.deleteById(id);
     }
 
-    private Appointment findOrThrow(Long id) {
+    private Agendamento findOrThrow(Long id) {
         return appointmentRepository.findById(id)
                 .orElseThrow(() -> new AppointmentNotFoundException(id));
     }
 
-    private AppointmentDtoResponse toResponse(Appointment appointment) {
-        return new AppointmentDtoResponse(
+    private AgendamentoDtoResponse toResponse(Agendamento appointment) {
+        return new AgendamentoDtoResponse(
                 appointment.getId(),
                 appointment.getDataMarcada(),
                 appointment.getHoraInicio(),

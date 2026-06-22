@@ -1,7 +1,7 @@
 package com.studioweb.studio_web.appointment;
 
-import com.studioweb.studio_web.client.Client;
-import com.studioweb.studio_web.user.User;
+import com.studioweb.studio_web.client.Cliente;
+import com.studioweb.studio_web.user.Usuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,20 +13,23 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Appointment {
+@Entity
+@Table(name = "tb_agendamento")
+public class Agendamento {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
+    @JoinColumn(name = "cliente_id")
+    private Cliente client;
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "usuario_id")
+    private Usuario user;
     private String descricao;
     private LocalDate dataMarcada;
-    private AppointmentStatus status;
+    @Enumerated(EnumType.STRING)
+    private AgendamentoStatus status;
     private LocalTime horaInicio;
     private LocalTime horaFim;
     private LocalDateTime criadoEm;

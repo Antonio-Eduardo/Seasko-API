@@ -3,7 +3,7 @@ package com.studioweb.studio_web.client.dto;
 import java.time.LocalDateTime;
 
 
-public record ClientDtoResponse(
+public record ClienteDtoResponse(
         Long id,
         String nome,
         String telefone,
