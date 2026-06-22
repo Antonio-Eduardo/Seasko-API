@@ -4,6 +4,7 @@ import com.studioweb.studio_web.client.dto.ClienteDtoRequest;
 import com.studioweb.studio_web.client.dto.ClienteDtoResponse;
 import com.studioweb.studio_web.exception.ClientNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +39,7 @@ public class ClienteService {
         return toResponse(repository.save(client));
     }
 
+    @Transactional
     public ClienteDtoResponse updateClient(Long id, ClienteDtoRequest dto) {
         Cliente client = repository.findById(id)
                 .orElseThrow(() -> new ClientNotFoundException(id));

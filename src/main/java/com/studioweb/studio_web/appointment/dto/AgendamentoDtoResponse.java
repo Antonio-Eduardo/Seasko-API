@@ -11,6 +11,7 @@ public record AgendamentoDtoResponse(
         LocalTime horaFim,
         AgendamentoStatus status,
         String descricao,
+        String anotacao,
         Long clientId,
         Long userId
 ) {}

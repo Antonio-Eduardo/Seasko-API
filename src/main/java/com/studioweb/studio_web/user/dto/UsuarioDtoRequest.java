@@ -2,10 +2,10 @@ package com.studioweb.studio_web.user.dto;
 
 import com.studioweb.studio_web.user.UsuarioRole;
 
-public record UserDtoResponse(
-        Long id,
+public record UsuarioDtoRequest(
+        String nome,
         String usuario,
-        UsuarioRole role,
-        Boolean ativo
-) {
+        String senha,
+        UsuarioRole role
+){
 }

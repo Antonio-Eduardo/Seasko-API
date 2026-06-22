@@ -1,10 +1,12 @@
 package com.studioweb.studio_web.user;
 
+import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
-import com.studioweb.studio_web.user.dto.UserDtoRequest;
-import com.studioweb.studio_web.user.dto.UserDtoResponse;
+import com.studioweb.studio_web.user.dto.UsuarioDtoRequest;
+import com.studioweb.studio_web.user.dto.UsuarioDtoResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,18 +21,18 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<UserDtoResponse> getAllUsers() {
+    public List<UsuarioDtoResponse> getAllUsers() {
         return repository.findAll().stream()
-                .map(user -> new UserDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo()))
+                .map(user -> new UsuarioDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo()))
                 .toList();
     }
 
-    public UserDtoResponse getUserById(Long id) {
+    public UsuarioDtoResponse getUserById(Long id) {
         Usuario user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
-        return new UserDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo());
+        return new UsuarioDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo());
     }
 
-    public UserDtoResponse insertUser(UserDtoRequest dto) {
+    public UsuarioDtoResponse insertUser(UsuarioDtoRequest dto) {
         Usuario user = new Usuario();
         user.setNome(dto.nome());
         user.setUsuario(dto.usuario());
@@ -38,6 +40,37 @@ public class UsuarioService {
         user.setRole(dto.role());
         user.setAtivo(true);
         Usuario saved = repository.save(user);
-        return new UserDtoResponse(saved.getId(), saved.getUsuario(), saved.getRole(), saved.getAtivo());
+        return new UsuarioDtoResponse(saved.getId(), saved.getUsuario(), saved.getRole(), saved.getAtivo());
+    }
+    public void deleteUser(Long id){
+        if (!repository.existsById(id)){
+            throw new UserNotFoundException(id);
+        }
+        repository.deleteById(id);
+    }
+    @Transactional
+    public UsuarioDtoResponse updateUser(Long id, UsuarioDtoRequest dto){
+        Usuario usuario = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        if(dto.usuario() != null) {
+            usuario.setUsuario(dto.usuario());
+        }
+        if(dto.nome() != null) {
+            usuario.setNome(dto.nome());
+        }
+        if (dto.senha() != null) {
+            usuario.setSenha(passwordEncoder.encode(dto.senha()));
+        }
+        if (dto.role() != null) {
+            usuario.setRole(dto.role());
+        }
+        return toResponse(repository.save(usuario));
+    }
+    private UsuarioDtoResponse toResponse(Usuario usuario){
+        return new UsuarioDtoResponse(
+                usuario.getId(),
+                usuario.getUsuario(),
+                usuario.getRole(),
+                usuario.getAtivo());
+
     }
 }

@@ -4,12 +4,14 @@ import com.studioweb.studio_web.appointment.dto.AgendamentoDtoRequest;
 import com.studioweb.studio_web.appointment.dto.AgendamentoDtoResponse;
 import com.studioweb.studio_web.client.Cliente;
 import com.studioweb.studio_web.client.ClienteRepository;
+import com.studioweb.studio_web.config.CurrentUserService;
 import com.studioweb.studio_web.exception.AppointmentNotFoundException;
 import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
 import com.studioweb.studio_web.user.Usuario;
 import com.studioweb.studio_web.user.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,13 +22,15 @@ public class AgendamentoService {
     private final AgendamentoRepository appointmentRepository;
     private final ClienteRepository clientRepository;
     private final UsuarioRepository userRepository;
+    private final CurrentUserService currentUserService;
 
     public AgendamentoService(AgendamentoRepository appointmentRepository,
                               ClienteRepository clientRepository,
-                              UsuarioRepository userRepository) {
+                              UsuarioRepository userRepository, CurrentUserService currentUserService) {
         this.appointmentRepository = appointmentRepository;
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
+        this.currentUserService = currentUserService;
     }
 
     public List<AgendamentoDtoResponse> getAllAppointments() {
@@ -39,16 +43,20 @@ public class AgendamentoService {
         return toResponse(findOrThrow(id));
     }
 
+    @Transactional
     public AgendamentoDtoResponse insertAppointment(AgendamentoDtoRequest dto) {
-        Cliente client = clientRepository.findById(dto.clientId())
-                .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
+        Usuario usuarioLogado = currentUserService.getUserLogado();
+
+        Cliente client = clientRepository.findById(usuarioLogado.getId())
+                .orElseThrow(() -> new ClientNotFoundException(usuarioLogado.getId()));
         Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
         Agendamento appointment = new Agendamento();
         appointment.setClient(client);
-        appointment.setUser(user);
+        appointment.setUser(usuarioLogado);
         appointment.setDescricao(dto.descricao());
+        appointment.setAnotacao(dto.anotacao());
         appointment.setDataMarcada(dto.dataMarcada());
         appointment.setHoraInicio(dto.horaInicio());
         appointment.setHoraFim(dto.horaFim());
@@ -58,16 +66,15 @@ public class AgendamentoService {
         return toResponse(appointmentRepository.save(appointment));
     }
 
+    @Transactional
     public AgendamentoDtoResponse updateAppointment(Long id, AgendamentoDtoRequest dto) {
         Agendamento appointment = findOrThrow(id);
 
-        Cliente client = clientRepository.findById(dto.clientId())
-                .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
         Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
-        appointment.setClient(client);
         appointment.setUser(user);
+        appointment.setAnotacao(dto.anotacao());
         appointment.setDescricao(dto.descricao());
         appointment.setDataMarcada(dto.dataMarcada());
         appointment.setHoraInicio(dto.horaInicio());
@@ -76,6 +83,7 @@ public class AgendamentoService {
         return toResponse(appointmentRepository.save(appointment));
     }
 
+    @Transactional
     public AgendamentoDtoResponse updateStatus(Long id, AgendamentoStatus status) {
         Agendamento appointment = findOrThrow(id);
         appointment.setStatus(status);
@@ -102,6 +110,7 @@ public class AgendamentoService {
                 appointment.getHoraFim(),
                 appointment.getStatus(),
                 appointment.getDescricao(),
+                appointment.getAnotacao(),
                 appointment.getClient().getId(),
                 appointment.getUser().getId()
         );
