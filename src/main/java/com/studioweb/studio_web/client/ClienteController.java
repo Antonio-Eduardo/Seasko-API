@@ -2,7 +2,6 @@ package com.studioweb.studio_web.client;
 
 import com.studioweb.studio_web.client.dto.ClienteDtoRequest;
 import com.studioweb.studio_web.client.dto.ClienteDtoResponse;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -19,12 +18,12 @@ public class ClienteController {
     public ClienteController(ClienteService clienteService) {
         this.clienteService = clienteService;
     }
-    @RequestMapping("/clientes")
+    @GetMapping
     public ResponseEntity<List<ClienteDtoResponse>> todosClientes(){
         List<ClienteDtoResponse> response = clienteService.getAllClients();
         return ResponseEntity.ok().body(response);
     }
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ClienteDtoResponse> buscarCliente(@PathVariable Long id){
         ClienteDtoResponse response = clienteService.getClientById(id);
         return ResponseEntity.ok().body(response);

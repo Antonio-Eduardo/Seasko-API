@@ -19,12 +19,12 @@ public class AgendamentoController {
         this.agendamentoService = agendamentoService;
     }
 
-    @RequestMapping("/agendamentos")
+    @GetMapping
     public ResponseEntity<List<AgendamentoDtoResponse>> todosAgendamentos(){
         List<AgendamentoDtoResponse> response = agendamentoService.getAllAppointments();
         return ResponseEntity.ok().body(response);
     }
-    @RequestMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<AgendamentoDtoResponse> buscarAgendamento(@PathVariable Long id){
         AgendamentoDtoResponse response = agendamentoService.getAppointmentById(id);
         return ResponseEntity.ok().body(response);

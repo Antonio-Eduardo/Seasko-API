@@ -2,7 +2,6 @@ package com.studioweb.studio_web.user;
 
 import com.studioweb.studio_web.user.dto.UsuarioDtoRequest;
 import com.studioweb.studio_web.user.dto.UsuarioDtoResponse;
-import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,7 +17,7 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-    @GetMapping("/usuarios")
+    @GetMapping
     public ResponseEntity<List<UsuarioDtoResponse>> getAllUsers(){
         List<UsuarioDtoResponse> response = usuarioService.getAllUsers();
         return ResponseEntity.ok().body(response);

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Web</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f3f4f6; color: #111827; }
+
+  /* ── Login ── */
+  #login {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 100vh; gap: 12px;
+  }
+  #login h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  #login p  { color: #6b7280; font-size: 0.9rem; margin-bottom: 8px; }
+  #login input {
+    width: 280px; padding: 10px 14px;
+    border: 1px solid #d1d5db; border-radius: 8px;
+    font-size: 1rem; outline: none; transition: border-color .15s;
+  }
+  #login input:focus { border-color: #6366f1; }
+  #login-btn {
+    width: 280px; padding: 10px; background: #6366f1; color: #fff;
+    border: none; border-radius: 8px; font-size: 1rem;
+    font-weight: 600; cursor: pointer; transition: background .15s;
+  }
+  #login-btn:hover { background: #4f46e5; }
+  #login-err { color: #dc2626; font-size: .85rem; min-height: 1.2em; }
+
+  /* ── App ── */
+  #app { display: none; max-width: 1200px; margin: 0 auto; padding: 28px 20px; }
+
+  header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px;
+  }
+  header h1 { font-size: 1.4rem; font-weight: 700; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 4px; margin-bottom: 22px; }
+  .tab {
+    padding: 8px 20px; border-radius: 8px; border: none;
+    font-size: .9rem; font-weight: 600; cursor: pointer;
+    background: #e5e7eb; color: #6b7280; transition: all .15s;
+  }
+  .tab.active { background: #6366f1; color: #fff; }
+  .tab:hover:not(.active) { background: #d1d5db; }
+
+  /* ── Cards ── */
+  .card {
+    background: #fff; border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    padding: 22px; margin-bottom: 22px;
+  }
+  .card-title { font-size: 1rem; font-weight: 600; color: #374151; margin-bottom: 18px; }
+
+  /* ── Form grid ── */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+  .span2 { grid-column: span 2; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field label {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #6b7280;
+  }
+  .field input, .field select, .field textarea {
+    padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+    font-size: .93rem; font-family: inherit; outline: none; transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #6366f1; }
+  .field textarea { resize: vertical; min-height: 58px; }
+  .field small { color: #9ca3af; font-size: .78rem; margin-top: 2px; }
+  .form-actions { margin-top: 16px; display: flex; gap: 8px; }
+
+  /* ── Configurações ── */
+  .config-card {
+    max-width: 420px;
+  }
+  .divider {
+    border: none; border-top: 1px solid #e5e7eb; margin: 22px 0;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 8px 18px; border: none; border-radius: 7px;
+    font-size: .875rem; font-weight: 600; cursor: pointer; transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-ghost   { background: #e5e7eb; color: #374151; }
+  .btn-danger  { background: #ef4444; color: #fff; }
+  .btn-sm      { padding: 5px 12px; font-size: .8rem; }
+
+  /* ── Table ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th {
+    text-align: left; padding: 10px 14px; font-size: .72rem;
+    text-transform: uppercase; letter-spacing: .05em;
+    color: #9ca3af; border-bottom: 1px solid #e5e7eb; white-space: nowrap;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: #fafafa; }
+  .empty { text-align: center; color: #9ca3af; padding: 40px 0; }
+
+  /* ── Status badge ── */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: .75rem; font-weight: 700; white-space: nowrap;
+  }
+  .MARCADO      { background: #dbeafe; color: #1e40af; }
+  .CONFIRMADO   { background: #d1fae5; color: #065f46; }
+  .CANCELADO    { background: #fee2e2; color: #991b1b; }
+  .CONCLUIDO    { background: #f3f4f6; color: #374151; }
+  .NAO_APARECEU { background: #fef3c7; color: #92400e; }
+
+  /* ── Row actions ── */
+  .actions { display: flex; gap: 6px; align-items: center; }
+  .actions select {
+    padding: 5px 7px; border: 1px solid #d1d5db;
+    border-radius: 6px; font-size: .8rem; outline: none;
+  }
+
+  /* ── Inline edit ── */
+  td input.edit-input, td textarea.edit-input {
+    width: 100%; padding: 5px 8px; border: 1px solid #a5b4fc;
+    border-radius: 6px; font-size: .88rem; font-family: inherit; outline: none;
+    background: #eef2ff;
+  }
+  td textarea.edit-input { resize: vertical; min-height: 48px; }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: .875rem; font-weight: 500;
+    color: #fff; background: #1f2937;
+    opacity: 0; pointer-events: none;
+    transition: opacity .25s; z-index: 999;
+  }
+  #toast.show { opacity: 1; }
+  #toast.err  { background: #dc2626; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ════════════════════════════════════════════════════════════ -->
+<div id="login">
+  <h1>Studio Web</h1>
+  <p>Faça login para continuar</p>
+  <input id="u" type="text"     placeholder="Usuário" autocomplete="username" />
+  <input id="p" type="password" placeholder="Senha"   autocomplete="current-password" />
+  <button id="login-btn" onclick="login()">Entrar</button>
+  <span id="login-err"></span>
+</div>
+
+<!-- ═══ APP ══════════════════════════════════════════════════════════════ -->
+<div id="app">
+  <header>
+    <h1>Studio Web</h1>
+    <button class="btn btn-primary" id="btn-novo" onclick="toggleForm()">+ Novo agendamento</button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="mudarAba('agendamentos')">Agendamentos</button>
+    <button class="tab"        onclick="mudarAba('clientes')">Clientes</button>
+    <button class="tab"        onclick="mudarAba('config')">Configurações</button>
+  </div>
+
+  <!-- ─── ABA: AGENDAMENTOS ─────────────────────────────────────────── -->
+  <div id="aba-agendamentos">
+    <div class="card" id="form-agendamento" style="display:none">
+      <div class="card-title">Novo agendamento</div>
+      <div class="grid">
+        <div class="field">
+          <label>Cliente</label>
+          <select id="f-cliente"></select>
+        </div>
+        <div class="field">
+          <label>Usuário</label>
+          <select id="f-usuario"></select>
+        </div>
+        <div class="field">
+          <label>Data</label>
+          <input id="f-data" type="date" />
+        </div>
+        <div class="field">
+          <label>Hora início</label>
+          <input id="f-inicio" type="time" />
+        </div>
+        <div class="field">
+          <label>Hora fim</label>
+          <input id="f-fim" type="time" />
+        </div>
+        <div class="field">
+          <label>Descrição</label>
+          <input id="f-descricao" type="text" />
+        </div>
+        <div class="field span2">
+          <label>Anotação</label>
+          <textarea id="f-anotacao"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="criarAgendamento()">Salvar</button>
+        <button class="btn btn-ghost"   onclick="toggleForm()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Data</th><th>Horário</th><th>Cliente</th>
+              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-ag">
+            <tr><td colspan="8" class="empty">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ABA: CLIENTES ─────────────────────────────────────────────── -->
+  <div id="aba-clientes" style="display:none">
+    <div class="card" id="form-cliente" style="display:none">
+      <div class="card-title">Novo cliente</div>
+      <div class="grid">
+        <div class="field">
+          <label>Nome</label>
+          <input id="c-nome" type="text" />
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input id="c-telefone" type="tel" />
+        </div>
+        <div class="field span2">
+          <label>Anotação</label>
+          <textarea id="c-anotacao"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="criarCliente()">Salvar</button>
+        <button class="btn btn-ghost"   onclick="toggleFormCliente()">Cancelar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Nome</th><th>Telefone</th>
+              <th>Anotação</th><th>Criado em</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-cl">
+            <tr><td colspan="6" class="empty">Carregando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ABA: CONFIGURAÇÕES ────────────────────────────────────────── -->
+  <div id="aba-config" style="display:none">
+    <div class="card config-card">
+      <div class="card-title">Trocar nome de usuário</div>
+      <div class="field">
+        <label>Novo usuário</label>
+        <input id="cfg-usuario" type="text" autocomplete="off" />
+        <small>Login atual: <strong id="cfg-usuario-atual"></strong></small>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="salvarUsuario()">Salvar</button>
+      </div>
+    </div>
+
+    <div class="card config-card">
+      <div class="card-title">Trocar senha</div>
+      <div class="field" style="margin-bottom:14px">
+        <label>Nova senha</label>
+        <input id="cfg-senha" type="password" autocomplete="new-password" />
+      </div>
+      <div class="field">
+        <label>Confirmar nova senha</label>
+        <input id="cfg-senha2" type="password" autocomplete="new-password" />
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="salvarSenha()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── Estado ────────────────────────────────────────────────────────────────
+let auth             = '';
+let usuarioLogado    = '';   // nome de login usado para entrar
+let usuarioLogadoId  = null; // id resolvido após carregar a lista
+let clientes         = [];
+let usuarios         = [];
+
+const STATUS = ['MARCADO','CONFIRMADO','CANCELADO','CONCLUIDO','NAO_APARECEU'];
+
+// ── Login ─────────────────────────────────────────────────────────────────
+async function login() {
+  const u = document.getElementById('u').value.trim();
+  const p = document.getElementById('p').value;
+  if (!u || !p) return;
+  auth          = 'Basic ' + btoa(u + ':' + p);
+  usuarioLogado = u;
+  try {
+    const res = await fetch('/agendamento', { headers: { Authorization: auth } });
+    if (res.status === 401) {
+      document.getElementById('login-err').textContent = 'Usuário ou senha incorretos.';
+      auth = '';
+      return;
+    }
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('app').style.display   = 'block';
+    await carregarTudo();
+  } catch {
+    document.getElementById('login-err').textContent = 'Não foi possível conectar ao servidor.';
+    auth = '';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && document.getElementById('login').style.display !== 'none') login();
+});
+
+// ── Abas ──────────────────────────────────────────────────────────────────
+function mudarAba(aba) {
+  ['agendamentos','clientes','config'].forEach((id, i) => {
+    document.getElementById(`aba-${id}`).style.display = aba === id ? 'block' : 'none';
+    document.querySelectorAll('.tab')[i].classList.toggle('active', aba === id);
+  });
+
+  const btnNovo = document.getElementById('btn-novo');
+  if (aba === 'agendamentos') {
+    btnNovo.textContent = '+ Novo agendamento';
+    btnNovo.onclick = toggleForm;
+    btnNovo.style.display = '';
+  } else if (aba === 'clientes') {
+    btnNovo.textContent = '+ Novo cliente';
+    btnNovo.onclick = toggleFormCliente;
+    btnNovo.style.display = '';
+  } else {
+    btnNovo.style.display = 'none';
+  }
+}
+
+// ── API helper ────────────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', Authorization: auth, ...(opts.headers || {}) }
+  });
+  if (!res.ok) {
+    const txt = await res.text().catch(() => '');
+    throw new Error(`Erro ${res.status}${txt ? ': ' + txt : ''}`);
+  }
+  if (res.status === 204) return null;
+  return res.json();
+}
+
+// ── Carregar tudo ─────────────────────────────────────────────────────────
+async function carregarTudo() {
+  const [ags, cls, usrs] = await Promise.all([
+    api('/agendamento'),
+    api('/cliente'),
+    api('/usuario')
+  ]);
+  clientes = cls;
+  usuarios = usrs;
+
+  const meu = usrs.find(u => u.usuario === usuarioLogado);
+  if (meu) usuarioLogadoId = meu.id;
+
+  document.getElementById('cfg-usuario-atual').textContent = usuarioLogado;
+
+  preencherDropdowns();
+  renderAgendamentos(ags);
+  renderClientes(cls);
+}
+
+// ── Dropdowns ─────────────────────────────────────────────────────────────
+function preencherDropdowns() {
+  document.getElementById('f-cliente').innerHTML =
+    clientes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
+  document.getElementById('f-usuario').innerHTML =
+    usuarios.map(u => `<option value="${u.id}">${u.usuario}</option>`).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// AGENDAMENTOS
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderAgendamentos(lista) {
+  const tbody = document.getElementById('tbody-ag');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty">Nenhum agendamento.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(a => `
+    <tr>
+      <td>${a.id}</td>
+      <td>${fmtData(a.dataMarcada)}</td>
+      <td>${fmtHora(a.horaInicio)} – ${fmtHora(a.horaFim)}</td>
+      <td>${nomeCliente(a.clientId)}</td>
+      <td>${nomeUsuario(a.userId)}</td>
+      <td>${a.descricao ?? '—'}</td>
+      <td><span class="badge ${a.status}">${a.status}</span></td>
+      <td>
+        <div class="actions">
+          <select id="sel-${a.id}">
+            ${STATUS.map(s => `<option value="${s}"${s === a.status ? ' selected' : ''}>${s}</option>`).join('')}
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="atualizarStatus(${a.id})">Salvar</button>
+          <button class="btn btn-danger  btn-sm" onclick="deletarAg(${a.id})">Deletar</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleForm() {
+  const el = document.getElementById('form-agendamento');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function criarAgendamento() {
+  const body = {
+    clientId:    Number(document.getElementById('f-cliente').value),
+    userId:      Number(document.getElementById('f-usuario').value),
+    dataMarcada: document.getElementById('f-data').value,
+    horaInicio:  toTime(document.getElementById('f-inicio').value),
+    horaFim:     toTime(document.getElementById('f-fim').value),
+    descricao:   document.getElementById('f-descricao').value || null,
+    anotacao:    document.getElementById('f-anotacao').value  || null
+  };
+  try {
+    await api('/agendamento/inserir', { method: 'POST', body: JSON.stringify(body) });
+    toast('Agendamento criado!');
+    toggleForm();
+    renderAgendamentos(await api('/agendamento'));
+  } catch (e) { toast(e.message, true); }
+}
+
+async function atualizarStatus(id) {
+  const status = document.getElementById(`sel-${id}`).value;
+  try {
+    await api(`/agendamento/status/${id}`, { method: 'PUT', body: JSON.stringify(status) });
+    toast('Status atualizado!');
+    renderAgendamentos(await api('/agendamento'));
+  } catch (e) { toast(e.message, true); }
+}
+
+async function deletarAg(id) {
+  if (!confirm(`Deletar agendamento #${id}?`)) return;
+  try {
+    await api(`/agendamento/deletar/${id}`, { method: 'DELETE' });
+    toast('Agendamento deletado.');
+    renderAgendamentos(await api('/agendamento'));
+  } catch (e) { toast(e.message, true); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CLIENTES
+// ══════════════════════════════════════════════════════════════════════════
+
+function renderClientes(lista) {
+  const tbody = document.getElementById('tbody-cl');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhum cliente cadastrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(c => `
+    <tr id="cl-row-${c.id}">
+      <td>${c.id}</td>
+      <td>${esc(c.nome)}</td>
+      <td>${esc(c.telefone ?? '—')}</td>
+      <td>${esc(c.anotacao ?? '—')}</td>
+      <td>${fmtDateTime(c.criadoEm)}</td>
+      <td>
+        <div class="actions">
+          <button class="btn btn-primary btn-sm" onclick="editarCliente(${c.id})">Editar</button>
+          <button class="btn btn-danger  btn-sm" onclick="deletarCl(${c.id})">Deletar</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleFormCliente() {
+  const el = document.getElementById('form-cliente');
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+  if (el.style.display === 'none') {
+    document.getElementById('c-nome').value     = '';
+    document.getElementById('c-telefone').value = '';
+    document.getElementById('c-anotacao').value = '';
+  }
+}
+
+async function criarCliente() {
+  const body = {
+    nome:     document.getElementById('c-nome').value.trim(),
+    telefone: document.getElementById('c-telefone').value.trim() || null,
+    anotacao: document.getElementById('c-anotacao').value.trim() || null
+  };
+  if (!body.nome) { toast('Nome é obrigatório.', true); return; }
+  try {
+    await api('/cliente/inserir', { method: 'POST', body: JSON.stringify(body) });
+    toast('Cliente criado!');
+    toggleFormCliente();
+    await recarregarClientes();
+  } catch (e) { toast(e.message, true); }
+}
+
+function editarCliente(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!c) return;
+  const row = document.getElementById(`cl-row-${id}`);
+  row.innerHTML = `
+    <td>${c.id}</td>
+    <td><input class="edit-input" id="e-nome-${id}" value="${esc(c.nome)}" /></td>
+    <td><input class="edit-input" id="e-tel-${id}"  value="${esc(c.telefone ?? '')}" /></td>
+    <td><textarea class="edit-input" id="e-anot-${id}">${esc(c.anotacao ?? '')}</textarea></td>
+    <td>${fmtDateTime(c.criadoEm)}</td>
+    <td>
+      <div class="actions">
+        <button class="btn btn-primary btn-sm" onclick="salvarCliente(${id})">Salvar</button>
+        <button class="btn btn-ghost   btn-sm" onclick="cancelarEdicao()">Cancelar</button>
+      </div>
+    </td>
+  `;
+}
+
+async function salvarCliente(id) {
+  const body = {
+    nome:     document.getElementById(`e-nome-${id}`).value.trim(),
+    telefone: document.getElementById(`e-tel-${id}`).value.trim()  || null,
+    anotacao: document.getElementById(`e-anot-${id}`).value.trim() || null
+  };
+  if (!body.nome) { toast('Nome é obrigatório.', true); return; }
+  try {
+    await api(`/cliente/atualizar/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    toast('Cliente atualizado!');
+    await recarregarClientes();
+  } catch (e) { toast(e.message, true); }
+}
+
+function cancelarEdicao() { renderClientes(clientes); }
+
+async function deletarCl(id) {
+  const c = clientes.find(x => x.id === id);
+  if (!confirm(`Deletar cliente "${c?.nome ?? id}"?`)) return;
+  try {
+    await api(`/cliente/deletar/${id}`, { method: 'DELETE' });
+    toast('Cliente deletado.');
+    await recarregarClientes();
+  } catch (e) { toast(e.message, true); }
+}
+
+async function recarregarClientes() {
+  clientes = await api('/cliente');
+  preencherDropdowns();
+  renderClientes(clientes);
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CONFIGURAÇÕES
+// ══════════════════════════════════════════════════════════════════════════
+
+async function salvarUsuario() {
+  const novoUsuario = document.getElementById('cfg-usuario').value.trim();
+  if (!novoUsuario) { toast('Digite o novo nome de usuário.', true); return; }
+  if (novoUsuario === usuarioLogado) { toast('É o mesmo nome de usuário atual.', true); return; }
+  if (!usuarioLogadoId)  { toast('ID do usuário não encontrado.', true); return; }
+
+  try {
+    await api(`/usuario/atualizar/${usuarioLogadoId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ usuario: novoUsuario })
+    });
+    usuarioLogado = novoUsuario;
+    auth = 'Basic ' + btoa(novoUsuario + ':' + senhaAtual());
+    document.getElementById('cfg-usuario-atual').textContent = novoUsuario;
+    document.getElementById('cfg-usuario').value = '';
+    toast('Nome de usuário atualizado!');
+  } catch (e) { toast(e.message, true); }
+}
+
+async function salvarSenha() {
+  const nova   = document.getElementById('cfg-senha').value;
+  const nova2  = document.getElementById('cfg-senha2').value;
+  if (!nova)         { toast('Digite a nova senha.', true); return; }
+  if (nova !== nova2){ toast('As senhas não coincidem.', true); return; }
+  if (!usuarioLogadoId) { toast('ID do usuário não encontrado.', true); return; }
+
+  try {
+    await api(`/usuario/atualizar/${usuarioLogadoId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ senha: nova })
+    });
+    auth = 'Basic ' + btoa(usuarioLogado + ':' + nova);
+    document.getElementById('cfg-senha').value  = '';
+    document.getElementById('cfg-senha2').value = '';
+    toast('Senha atualizada! Use a nova senha no próximo login.');
+  } catch (e) { toast(e.message, true); }
+}
+
+// Extrai a senha atual do header Basic para recompor auth após trocar usuário
+function senhaAtual() {
+  try { return atob(auth.replace('Basic ', '')).split(':').slice(1).join(':'); }
+  catch { return ''; }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function nomeCliente(id) { return clientes.find(c => c.id === id)?.nome    ?? `#${id}`; }
+function nomeUsuario(id) { return usuarios.find(u => u.id === id)?.usuario ?? `#${id}`; }
+
+function fmtData(val) {
+  if (!val) return '—';
+  if (Array.isArray(val)) { const [y,m,d] = val; return `${pad(d)}/${pad(m)}/${y}`; }
+  const [y,m,d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fmtHora(val) {
+  if (!val) return '—';
+  if (Array.isArray(val)) return `${pad(val[0])}:${pad(val[1])}`;
+  return String(val).substring(0, 5);
+}
+
+function fmtDateTime(val) {
+  if (!val) return '—';
+  if (Array.isArray(val)) {
+    const [y,mo,d,h,mi] = val;
+    return `${pad(d)}/${pad(mo)}/${y} ${pad(h)}:${pad(mi)}`;
+  }
+  const [date, time] = String(val).split('T');
+  const [y,m,d] = date.split('-');
+  return `${d}/${m}/${y} ${time.substring(0,5)}`;
+}
+
+function toTime(val) {
+  if (!val) return null;
+  return val.length === 5 ? val + ':00' : val;
+}
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function esc(str) {
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, err = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3500);
+}
+</script>
+</body>
+</html>
