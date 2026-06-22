@@ -1,5 +1,6 @@
 package com.studioweb.studio_web.user;
 
+import com.studioweb.studio_web.exception.UserNotFoundException;
 import com.studioweb.studio_web.user.dto.UserDtoRequest;
 import com.studioweb.studio_web.user.dto.UserDtoResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +26,7 @@ public class UserService {
     }
 
     public UserDtoResponse getUserById(Long id) {
-        User user = repository.findById(id).orElseThrow(RuntimeException::new);
+        User user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
         return new UserDtoResponse(user.getId(), user.getUsuario(), user.getRole(), user.getAtivo());
     }
 

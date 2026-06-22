@@ -2,6 +2,7 @@ package com.studioweb.studio_web.client;
 
 import com.studioweb.studio_web.client.dto.ClientDtoRequest;
 import com.studioweb.studio_web.client.dto.ClientDtoResponse;
+import com.studioweb.studio_web.exception.ClientNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class ClientService {
 
     public ClientDtoResponse getClientById(Long id) {
         Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado: " + id));
+                .orElseThrow(() -> new ClientNotFoundException(id));
         return toResponse(client);
     }
 
@@ -39,7 +40,7 @@ public class ClientService {
 
     public ClientDtoResponse updateClient(Long id, ClientDtoRequest dto) {
         Client client = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado: " + id));
+                .orElseThrow(() -> new ClientNotFoundException(id));
         client.setNome(dto.nome());
         client.setTelefone(dto.telefone());
         client.setAnotacao(dto.anotacao());
@@ -48,7 +49,7 @@ public class ClientService {
 
     public void deleteClient(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Cliente não encontrado: " + id);
+            throw new ClientNotFoundException(id);
         }
         repository.deleteById(id);
     }
