@@ -4,7 +4,6 @@ import com.studioweb.studio_web.appointment.dto.AgendamentoDtoRequest;
 import com.studioweb.studio_web.appointment.dto.AgendamentoDtoResponse;
 import com.studioweb.studio_web.client.Cliente;
 import com.studioweb.studio_web.client.ClienteRepository;
-import com.studioweb.studio_web.config.CurrentUserService;
 import com.studioweb.studio_web.exception.AppointmentNotFoundException;
 import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
@@ -22,15 +21,13 @@ public class AgendamentoService {
     private final AgendamentoRepository appointmentRepository;
     private final ClienteRepository clientRepository;
     private final UsuarioRepository userRepository;
-    private final CurrentUserService currentUserService;
 
     public AgendamentoService(AgendamentoRepository appointmentRepository,
                               ClienteRepository clientRepository,
-                              UsuarioRepository userRepository, CurrentUserService currentUserService) {
+                              UsuarioRepository userRepository) {
         this.appointmentRepository = appointmentRepository;
         this.clientRepository = clientRepository;
         this.userRepository = userRepository;
-        this.currentUserService = currentUserService;
     }
 
     public List<AgendamentoDtoResponse> getAllAppointments() {
@@ -45,16 +42,15 @@ public class AgendamentoService {
 
     @Transactional
     public AgendamentoDtoResponse insertAppointment(AgendamentoDtoRequest dto) {
-        Usuario usuarioLogado = currentUserService.getUserLogado();
 
-        Cliente client = clientRepository.findById(usuarioLogado.getId())
-                .orElseThrow(() -> new ClientNotFoundException(usuarioLogado.getId()));
+        Cliente client = clientRepository.findById(dto.clientId())
+                .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
         Usuario user = userRepository.findById(dto.userId())
                 .orElseThrow(() -> new UserNotFoundException(dto.userId()));
 
         Agendamento appointment = new Agendamento();
         appointment.setClient(client);
-        appointment.setUser(usuarioLogado);
+        appointment.setUser(user);
         appointment.setDescricao(dto.descricao());
         appointment.setAnotacao(dto.anotacao());
         appointment.setDataMarcada(dto.dataMarcada());

@@ -7,6 +7,7 @@ public record AgendamentoDtoRequest(
         LocalDate dataMarcada,
         LocalTime horaInicio,
         LocalTime horaFim,
+        Long clientId,
         Long userId,
         String descricao,
         String anotacao
