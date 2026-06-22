@@ -314,6 +314,45 @@
   }
   #toast.show { opacity: 1; animation: slideUp .2s ease; }
   #toast.err  { background: var(--danger); }
+
+  /* ── Responsividade ── */
+  @media (max-width: 768px) {
+    #app { padding: 16px 12px; }
+
+    header {
+      flex-direction: column; align-items: flex-start; gap: 10px;
+      padding-bottom: 12px;
+    }
+    .header-right { width: 100%; justify-content: flex-end; }
+
+    .tabs { overflow-x: auto; gap: 0; }
+    .tab  { white-space: nowrap; padding: 10px 14px; }
+
+    .grid { grid-template-columns: 1fr; }
+    .span2 { grid-column: span 1; }
+
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table { min-width: 560px; }
+
+    .col-id { display: none; }
+    .col-acoes { width: auto; }
+    .actions { flex-wrap: wrap; gap: 4px; }
+
+    .config-card { max-width: 100%; }
+
+    .form-actions { flex-direction: column; }
+    .form-actions .btn { width: 100%; text-align: center; }
+  }
+
+  @media (max-width: 480px) {
+    #login input, #login-btn { width: 100%; max-width: 320px; }
+    .header-brand-name { font-size: 1rem; }
+    .aba-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .aba-header .btn { width: 100%; }
+  }
 </style>
 </head>
 <body>
