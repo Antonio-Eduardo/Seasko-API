@@ -199,7 +199,7 @@
 <button id="dark-toggle-login" onclick="toggleDark()"
   style="position:fixed;top:16px;right:16px;padding:6px 14px;border-radius:7px;
          border:1px solid var(--border);background:var(--bg-tab);color:var(--color-text);
-         font-size:.85rem;font-weight:600;cursor:pointer">🌙 Escuro</button>
+         font-size:.85rem;font-weight:600;cursor:pointer">Dark mode</button>
 
 <!-- ═══ LOGIN ════════════════════════════════════════════════════════════ -->
 <div id="login">
@@ -216,7 +216,7 @@
   <header>
     <h1>Agilo</h1>
     <div style="display:flex;gap:8px;align-items:center">
-      <button id="dark-toggle" onclick="toggleDark()">🌙 Escuro</button>
+      <button id="dark-toggle" onclick="toggleDark()">Dark mode</button>
       <button class="btn btn-primary" id="btn-novo" onclick="toggleForm()">+ Novo agendamento</button>
     </div>
   </header>
@@ -417,7 +417,7 @@
 
 function applyDark(on) {
   document.body.classList.toggle('dark', on);
-  const label = on ? '☀️ Claro' : '🌙 Escuro';
+  const label = on ? 'Light mode' : 'Dark mode';
   ['dark-toggle', 'dark-toggle-login'].forEach(id => {
     const btn = document.getElementById(id);
     if (btn) btn.textContent = label;
