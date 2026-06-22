@@ -181,6 +181,24 @@
   }
   #dark-toggle:hover { background: var(--bg-tab-hov); }
 
+  /* ── Modal ── */
+  #modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.45); z-index: 1000;
+    align-items: center; justify-content: center;
+  }
+  #modal-overlay.show { display: flex; }
+  #modal-box {
+    background: var(--bg-card); border-radius: 12px;
+    padding: 28px 32px; max-width: 380px; width: 90%;
+    box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  }
+  #modal-msg {
+    font-size: .95rem; color: var(--color-text);
+    margin-bottom: 22px; line-height: 1.5;
+  }
+  #modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
   /* ── Toast ── */
   #toast {
     position: fixed; bottom: 24px; right: 24px;
@@ -374,7 +392,7 @@
           <thead>
             <tr>
               <th>#</th><th>Data</th><th>Horário</th><th>Cliente</th>
-              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Status rápido</th><th>Ações</th>
+              <th>Usuário</th><th>Descrição</th><th>Status</th><th>Atualizar Status</th><th>Ações</th>
             </tr>
           </thead>
           <tbody id="tbody-ag">
@@ -504,6 +522,16 @@
   </div>
 </div>
 
+<div id="modal-overlay">
+  <div id="modal-box">
+    <div id="modal-msg"></div>
+    <div id="modal-actions">
+      <button class="btn btn-ghost"  id="modal-cancel">Cancelar</button>
+      <button class="btn btn-danger" id="modal-confirm">Deletar</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -622,6 +650,9 @@ async function api(path, opts = {}) {
 
 // ── Carregar tudo ─────────────────────────────────────────────────────────
 async function carregarTudo() {
+  setLoading('tbody-ag', 9);
+  setLoading('tbody-cl', 6);
+  setLoading('tbody-usr', 5);
   const [ags, cls, usrs] = await Promise.all([
     api('/agendamento'),
     api('/cliente'),
@@ -670,6 +701,7 @@ async function aplicarFiltros() {
   if (usr)    params.set('usuarioId', usr);
   if (status) params.set('status',    status);
   try {
+    setLoading('tbody-ag', 9);
     const qs = params.toString();
     renderAgendamentos(await api('/agendamento' + (qs ? '?' + qs : '')));
   } catch (e) { toast(e.message, true); }
@@ -805,7 +837,7 @@ async function atualizarStatus(id) {
 }
 
 async function deletarAg(id) {
-  if (!confirm(`Deletar agendamento #${id}?`)) return;
+  if (!await confirmar(`Deletar agendamento #${id}?`)) return;
   try {
     await api(`/agendamento/deletar/${id}`, { method: 'DELETE' });
     toast('Agendamento deletado.');
@@ -902,7 +934,7 @@ function cancelarEdicao() { renderClientes(clientes); }
 
 async function deletarCl(id) {
   const c = clientes.find(x => x.id === id);
-  if (!confirm(`Deletar cliente "${c?.nome ?? id}"?`)) return;
+  if (!await confirmar(`Deletar cliente "${c?.nome ?? id}"?`)) return;
   try {
     await api(`/cliente/deletar/${id}`, { method: 'DELETE' });
     toast('Cliente deletado.');
@@ -911,10 +943,12 @@ async function deletarCl(id) {
 }
 
 async function recarregarAgendamentos() {
+  setLoading('tbody-ag', 9);
   renderAgendamentos(await api('/agendamento'));
 }
 
 async function recarregarClientes() {
+  setLoading('tbody-cl', 6);
   clientes = await api('/cliente');
   preencherDropdowns();
   renderClientes(clientes);
@@ -975,7 +1009,7 @@ async function criarUsuario() {
 }
 
 async function deletarUsr(id, nome) {
-  if (!confirm(`Deletar usuário "${nome}"?`)) return;
+  if (!await confirmar(`Deletar usuário "${nome}"?`)) return;
   try {
     await api(`/usuario/deletar/${id}`, { method: 'DELETE' });
     toast('Usuário deletado.');
@@ -984,6 +1018,7 @@ async function deletarUsr(id, nome) {
 }
 
 async function recarregarUsuarios() {
+  setLoading('tbody-usr', 5);
   usuarios = await api('/usuario');
   preencherDropdowns();
   renderUsuarios(usuarios);
@@ -1085,6 +1120,40 @@ function toast(msg, err = false) {
   el.className = 'show' + (err ? ' err' : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.className = '', 3500);
+}
+
+// ── Modal de confirmação ──────────────────────────────────────────────────
+function confirmar(msg) {
+  return new Promise(resolve => {
+    document.getElementById('modal-msg').textContent = msg;
+    document.getElementById('modal-overlay').classList.add('show');
+
+    const btnOk     = document.getElementById('modal-confirm');
+    const btnCancel = document.getElementById('modal-cancel');
+
+    function fechar(resultado) {
+      document.getElementById('modal-overlay').classList.remove('show');
+      btnOk.removeEventListener('click', onOk);
+      btnCancel.removeEventListener('click', onCancel);
+      resolve(resultado);
+    }
+    function onOk()     { fechar(true);  }
+    function onCancel() { fechar(false); }
+
+    btnOk.addEventListener('click', onOk);
+    btnCancel.addEventListener('click', onCancel);
+  });
+}
+
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-cancel').click();
+});
+
+// ── Loading nas tabelas ───────────────────────────────────────────────────
+function setLoading(tbodyId, colspan) {
+  document.getElementById(tbodyId).innerHTML =
+    `<tr><td colspan="${colspan}" class="empty" style="color:var(--color-muted)">Carregando…</td></tr>`;
 }
 </script>
 </body>
