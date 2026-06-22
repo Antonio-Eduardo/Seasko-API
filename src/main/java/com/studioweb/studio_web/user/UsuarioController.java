@@ -18,28 +18,28 @@ public class UsuarioController {
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
-    @GetMapping
+    @GetMapping("/usuarios")
     public ResponseEntity<List<UsuarioDtoResponse>> getAllUsers(){
         List<UsuarioDtoResponse> response = usuarioService.getAllUsers();
         return ResponseEntity.ok().body(response);
     }
-    @GetMapping(value = "/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UsuarioDtoResponse>  userById(@PathVariable Long id){
         UsuarioDtoResponse response = usuarioService.getUserById(id);
         return ResponseEntity.ok().body(response);
     }
     @PostMapping("/registrar")
-    public ResponseEntity<UsuarioDtoResponse> insertUser(@RequestBody @Valid UsuarioDtoRequest dto){
+    public ResponseEntity<UsuarioDtoResponse> insertUser(@RequestBody UsuarioDtoRequest dto){
         UsuarioDtoResponse response = usuarioService.insertUser(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
-    @DeleteMapping(value = "/deletar/{id}")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
         usuarioService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
-    @PostMapping(value = "/atualizar/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<UsuarioDtoResponse> atualizarUmUsuario(@PathVariable Long id, @RequestBody UsuarioDtoRequest dto){
         UsuarioDtoResponse response = usuarioService.updateUser(id,dto);
         return ResponseEntity.ok().body(response);

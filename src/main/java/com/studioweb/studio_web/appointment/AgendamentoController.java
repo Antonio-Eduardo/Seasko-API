@@ -19,7 +19,7 @@ public class AgendamentoController {
         this.agendamentoService = agendamentoService;
     }
 
-    @RequestMapping
+    @RequestMapping("/agendamentos")
     public ResponseEntity<List<AgendamentoDtoResponse>> todosAgendamentos(){
         List<AgendamentoDtoResponse> response = agendamentoService.getAllAppointments();
         return ResponseEntity.ok().body(response);
@@ -35,12 +35,12 @@ public class AgendamentoController {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
-    @PostMapping("/atualizar/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<AgendamentoDtoResponse> atualizarAgendamento(@PathVariable Long id, @RequestBody AgendamentoDtoRequest dto){
         AgendamentoDtoResponse response = agendamentoService.updateAppointment(id,dto);
         return ResponseEntity.ok().body(response);
     }
-    @PostMapping("status/{id}")
+    @PutMapping("status/{id}")
     public ResponseEntity<AgendamentoDtoResponse> atualizarStatus(@PathVariable Long id, @RequestBody AgendamentoStatus status){
         AgendamentoDtoResponse response = agendamentoService.updateStatus(id,status);
         return ResponseEntity.ok().body(response);

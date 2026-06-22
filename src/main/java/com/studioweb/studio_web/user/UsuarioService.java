@@ -1,6 +1,5 @@
 package com.studioweb.studio_web.user;
 
-import com.studioweb.studio_web.exception.ClientNotFoundException;
 import com.studioweb.studio_web.exception.UserNotFoundException;
 import com.studioweb.studio_web.user.dto.UsuarioDtoRequest;
 import com.studioweb.studio_web.user.dto.UsuarioDtoResponse;

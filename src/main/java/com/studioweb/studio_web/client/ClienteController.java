@@ -19,7 +19,7 @@ public class ClienteController {
     public ClienteController(ClienteService clienteService) {
         this.clienteService = clienteService;
     }
-    @RequestMapping
+    @RequestMapping("/clientes")
     public ResponseEntity<List<ClienteDtoResponse>> todosClientes(){
         List<ClienteDtoResponse> response = clienteService.getAllClients();
         return ResponseEntity.ok().body(response);
@@ -30,18 +30,18 @@ public class ClienteController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping("/inserir")
-    public ResponseEntity<ClienteDtoResponse> inserirCliente(@RequestBody@Valid ClienteDtoRequest dto){
+    public ResponseEntity<ClienteDtoResponse> inserirCliente(@RequestBody ClienteDtoRequest dto){
         ClienteDtoResponse response = clienteService.insertClient(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
-    @PostMapping("/atualizar/{id}")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<ClienteDtoResponse> atualizarCliente(@PathVariable Long id, @RequestBody ClienteDtoRequest dto){
         ClienteDtoResponse response = clienteService.updateClient(id,dto);
         return ResponseEntity.ok().body(response);
     }
-    @DeleteMapping("/deleter/{id}")
-    public ResponseEntity<Void> deletarCliente(Long id){
+    @DeleteMapping("/deletar/{id}")
+    public ResponseEntity<Void> deletarCliente(@PathVariable Long id){
         clienteService.deleteClient(id);
         return ResponseEntity.noContent().build();
     }
