@@ -98,8 +98,8 @@ class AgendamentoServiceTest {
         assertThat(result.totalElements()).isEqualTo(1L);
         assertThat(result.content().get(0).id()).isEqualTo(1L);
         assertThat(result.content().get(0).status()).isEqualTo(AgendamentoStatus.MARCADO);
-        assertThat(result.content().get(0).clientId()).isEqualTo(1L);
-        assertThat(result.content().get(0).userId()).isEqualTo(1L);
+        assertThat(result.content().get(0).clientNome()).isEqualTo("João");
+        assertThat(result.content().get(0).userNome()).isEqualTo("Admin");
     }
 
     @Test
@@ -141,6 +141,7 @@ class AgendamentoServiceTest {
                 LocalTime.of(10, 0),
                 1L, 1L, null, "Corte", ""
         );
+        when(appointmentRepository.existsConflitoHorario(any(), any(), any())).thenReturn(false);
         when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(appointmentRepository.save(any(Agendamento.class))).thenReturn(agendamento);
@@ -166,6 +167,7 @@ class AgendamentoServiceTest {
                 LocalTime.of(10, 0),
                 99L, 1L, null, "Corte", ""
         );
+        when(appointmentRepository.existsConflitoHorario(any(), any(), any())).thenReturn(false);
         when(clientRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.insertAppointment(dto))
@@ -183,6 +185,7 @@ class AgendamentoServiceTest {
                 LocalTime.of(10, 0),
                 1L, 99L, null, "Corte", ""
         );
+        when(appointmentRepository.existsConflitoHorario(any(), any(), any())).thenReturn(false);
         when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -202,6 +205,7 @@ class AgendamentoServiceTest {
                 1L, 1L, AgendamentoStatus.CONFIRMADO, "Coloração", "observação"
         );
         when(appointmentRepository.findById(1L)).thenReturn(Optional.of(agendamento));
+        when(appointmentRepository.existsConflitoHorarioExcluindo(any(), any(), any(), any())).thenReturn(false);
         when(clientRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(userRepository.findById(1L)).thenReturn(Optional.of(usuario));
         when(appointmentRepository.save(any(Agendamento.class))).thenReturn(agendamento);

@@ -15,5 +15,5 @@ public record AgendamentoDtoRequest(
         @NotNull Long userId,
         @NotNull AgendamentoStatus status,
         @NotBlank String descricao,
-        @NotBlank String anotacao
+        String anotacao
 ) {}
