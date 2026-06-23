@@ -7,6 +7,7 @@ import com.agilo.client.ClienteRepository;
 import com.agilo.common.PageResponse;
 import com.agilo.exception.AppointmentNotFoundException;
 import com.agilo.exception.ClientNotFoundException;
+import com.agilo.exception.HorarioOcupadoException;
 import com.agilo.exception.UserNotFoundException;
 import com.agilo.user.Usuario;
 import com.agilo.user.UsuarioRepository;
@@ -67,6 +68,15 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoDtoResponse insertAppointment(AgendamentoDtoRequest dto) {
 
+        boolean conflito = appointmentRepository.existsConflitoHorario(
+                dto.dataMarcada(),
+                dto.horaInicio(),
+                dto.horaFim()
+        );
+        if (conflito){
+            throw new HorarioOcupadoException(dto.dataMarcada(), dto.horaInicio(), dto.horaFim());
+        }
+
         Cliente client = clientRepository.findById(dto.clientId())
                 .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
         Usuario user = userRepository.findById(dto.userId())
@@ -89,7 +99,17 @@ public class AgendamentoService {
     @Transactional
     public AgendamentoDtoResponse updateAppointment(Long id, AgendamentoDtoRequest dto) {
         Agendamento appointment = findOrThrow(id);
-
+        boolean conflito = appointmentRepository.existsConflitoHorarioExcluindo(
+                dto.dataMarcada(),
+                dto.horaInicio(),
+                dto.horaFim(),
+                id
+        );
+        if (conflito){
+            throw new HorarioOcupadoException(dto.dataMarcada(),
+                    dto.horaInicio(),
+                    dto.horaFim());
+        }
         Cliente client = clientRepository.findById(dto.clientId())
                 .orElseThrow(() -> new ClientNotFoundException(dto.clientId()));
         Usuario user = userRepository.findById(dto.userId())

@@ -55,7 +55,7 @@ public class AgendamentoController {
         return ResponseEntity.ok().body(response);
     }
     @PutMapping("status/{id}")
-    public ResponseEntity<AgendamentoDtoResponse> atualizarStatus(@PathVariable Long id, @RequestBody @Valid AgendamentoStatus status){
+    public ResponseEntity<AgendamentoDtoResponse> atualizarStatus(@PathVariable Long id, @RequestBody AgendamentoStatus status){
         AgendamentoDtoResponse response = agendamentoService.updateStatus(id,status);
         return ResponseEntity.ok().body(response);
     }
