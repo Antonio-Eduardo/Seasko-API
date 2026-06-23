@@ -1,4 +1,4 @@
-# Agilo
+# Seasko
 
 Sistema completo de gerenciamento de agendamentos para estúdios (salão de beleza, barbearia, etc.).
 

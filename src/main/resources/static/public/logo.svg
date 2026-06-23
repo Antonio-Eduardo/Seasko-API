@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 148">
+  <defs>
+    <linearGradient id="fade" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="14" width="120" height="120" rx="28" fill="#0ea5e9"/>
+  <path d="M14 54 Q26 40 38 54 Q50 68 62 54 Q74 40 86 54 Q98 68 110 54" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <path d="M14 82 Q26 68 38 82 Q50 96 62 82 Q74 68 86 82 Q98 96 110 82" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
+  <path d="M14 110 Q26 96 38 110 Q50 124 62 110 Q74 96 86 110 Q98 124 110 110" fill="none" stroke="white" stroke-width="6" stroke-linecap="round" opacity="0.4"/>
+
+  <text x="142" y="86" font-family="'Segoe UI', system-ui, sans-serif" font-size="64" font-weight="700" fill="url(#fade)">Seasko</text>
+  <text x="144" y="114" font-family="'Segoe UI', system-ui, sans-serif" font-size="18" font-weight="400" fill="#94a3b8">gestão de agendamentos</text>
+</svg>

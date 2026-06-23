@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agilo</title>
+<title>Seasko</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,10 +103,12 @@
     width: 32px; height: 32px; flex-shrink: 0;
   }
   .header-brand-name {
-    font-size: 1.15rem; font-weight: 700; color: var(--color-title); letter-spacing: -.02em;
+    font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em;
+    background: linear-gradient(to right, #f1f5f9, #0ea5e9);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
   }
-  .header-brand-name span {
-    color: var(--primary);
+  .header-brand-sub {
+    font-size: 0.65rem; color: var(--color-muted); letter-spacing: .01em; line-height: 1;
   }
   .header-right {
     display: flex; align-items: center; gap: 8px;
@@ -374,7 +376,7 @@
 
 <!-- ═══ LOGIN ════════════════════════════════════════════════════════════ -->
 <div id="login">
-  <h1>Agilo</h1>
+  <img src="/public/logo.svg" alt="Seasko" style="width:320px;margin-bottom:8px;">
   <p>Faça login para continuar</p>
   <input id="u" type="text"     placeholder="Usuário" autocomplete="username" />
   <input id="p" type="password" placeholder="Senha"   autocomplete="current-password" />
@@ -386,15 +388,11 @@
 <div id="app">
   <header>
     <div class="header-brand">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="32" height="32" rx="8" fill="var(--primary)"/>
-        <rect x="8" y="9" width="16" height="2" rx="1" fill="white"/>
-        <rect x="8" y="14" width="16" height="2" rx="1" fill="white" opacity=".7"/>
-        <rect x="8" y="19" width="10" height="2" rx="1" fill="white" opacity=".4"/>
-        <circle cx="24" cy="22" r="4" fill="white" opacity=".9"/>
-        <path d="M22.5 22l1 1 2-2" stroke="var(--primary)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span class="header-brand-name">Agi<span>lo</span></span>
+      <img src="/favicon.svg" width="32" height="32" alt="Seasko">
+      <div style="display:flex;flex-direction:column;gap:1px;">
+        <span class="header-brand-name">Seasko</span>
+        <span class="header-brand-sub">gestão de agendamentos</span>
+      </div>
     </div>
     <div class="header-right">
       <span class="header-user" id="header-usuario"></span>
