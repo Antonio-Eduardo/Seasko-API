@@ -1144,14 +1144,14 @@ function editarCliente(id) {
     <td>${fmtDateTime(c.criadoEm)}</td>
     <td>
       <div class="actions">
-        <button class="btn btn-primary btn-sm" onclick="salvarCliente(${id})">Salvar</button>
+        <button class="btn btn-primary btn-sm" onclick="salvarCliente(${id}, this)">Salvar</button>
         <button class="btn btn-ghost   btn-sm" onclick="cancelarEdicao()">Cancelar</button>
       </div>
     </td>
   `;
 }
 
-async function salvarCliente(id) {
+async function salvarCliente(id, btn) {
   const body = {
     nome:     document.getElementById(`e-nome-${id}`).value.trim(),
     telefone: document.getElementById(`e-tel-${id}`).value.trim()  || null,
@@ -1164,6 +1164,7 @@ async function salvarCliente(id) {
     toast('Cliente atualizado!');
     await recarregarClientes();
   } catch (e) { toast(e.message, true); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 }
 
 function cancelarEdicao() { recarregarClientes(); }
