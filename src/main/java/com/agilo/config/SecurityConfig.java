@@ -22,6 +22,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/index.html", "/public/**").permitAll()
+                        .requestMatchers("/favicon.svg").permitAll()
                         .requestMatchers(HttpMethod.POST, "/usuario/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/usuario/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/usuario/**").hasRole("ADMIN")
