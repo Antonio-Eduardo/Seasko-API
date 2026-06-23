@@ -135,8 +135,8 @@ public class AgendamentoService {
                 appointment.getStatus(),
                 appointment.getDescricao(),
                 appointment.getAnotacao(),
-                appointment.getClient().getId(),
-                appointment.getUser().getId()
+                appointment.getClient().getNome(),
+                appointment.getUser().getNome()
         );
     }
 }

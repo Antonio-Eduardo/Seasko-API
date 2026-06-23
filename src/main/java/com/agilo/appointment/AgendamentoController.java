@@ -3,6 +3,7 @@ package com.agilo.appointment;
 import com.agilo.appointment.dto.AgendamentoDtoRequest;
 import com.agilo.appointment.dto.AgendamentoDtoResponse;
 import com.agilo.common.PageResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -43,18 +44,18 @@ public class AgendamentoController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping("/inserir")
-    public ResponseEntity<AgendamentoDtoResponse> inserirAgendamento(@RequestBody AgendamentoDtoRequest dto){
+    public ResponseEntity<AgendamentoDtoResponse> inserirAgendamento(@RequestBody @Valid AgendamentoDtoRequest dto){
         AgendamentoDtoResponse response = agendamentoService.insertAppointment(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<AgendamentoDtoResponse> atualizarAgendamento(@PathVariable Long id, @RequestBody AgendamentoDtoRequest dto){
+    public ResponseEntity<AgendamentoDtoResponse> atualizarAgendamento(@PathVariable Long id, @RequestBody @Valid AgendamentoDtoRequest dto){
         AgendamentoDtoResponse response = agendamentoService.updateAppointment(id,dto);
         return ResponseEntity.ok().body(response);
     }
     @PutMapping("status/{id}")
-    public ResponseEntity<AgendamentoDtoResponse> atualizarStatus(@PathVariable Long id, @RequestBody AgendamentoStatus status){
+    public ResponseEntity<AgendamentoDtoResponse> atualizarStatus(@PathVariable Long id, @RequestBody @Valid AgendamentoStatus status){
         AgendamentoDtoResponse response = agendamentoService.updateStatus(id,status);
         return ResponseEntity.ok().body(response);
     }

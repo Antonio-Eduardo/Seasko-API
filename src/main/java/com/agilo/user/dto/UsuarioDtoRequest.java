@@ -1,11 +1,13 @@
 package com.agilo.user.dto;
 
 import com.agilo.user.UsuarioRole;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record UsuarioDtoRequest(
-        String nome,
-        String usuario,
-        String senha,
-        UsuarioRole role
+        @NotBlank String nome,
+        @NotBlank String usuario,
+        @NotBlank String senha,
+        @NotNull UsuarioRole role
 ){
 }

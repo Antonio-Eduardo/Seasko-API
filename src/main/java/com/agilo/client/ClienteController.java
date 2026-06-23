@@ -3,6 +3,7 @@ package com.agilo.client;
 import com.agilo.client.dto.ClienteDtoRequest;
 import com.agilo.client.dto.ClienteDtoResponse;
 import com.agilo.common.PageResponse;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +35,13 @@ public class ClienteController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping("/inserir")
-    public ResponseEntity<ClienteDtoResponse> inserirCliente(@RequestBody ClienteDtoRequest dto){
+    public ResponseEntity<ClienteDtoResponse> inserirCliente(@RequestBody @Valid ClienteDtoRequest dto){
         ClienteDtoResponse response = clienteService.insertClient(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<ClienteDtoResponse> atualizarCliente(@PathVariable Long id, @RequestBody ClienteDtoRequest dto){
+    public ResponseEntity<ClienteDtoResponse> atualizarCliente(@PathVariable Long id, @RequestBody @Valid ClienteDtoRequest dto){
         ClienteDtoResponse response = clienteService.updateClient(id,dto);
         return ResponseEntity.ok().body(response);
     }

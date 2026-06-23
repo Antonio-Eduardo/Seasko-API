@@ -12,6 +12,6 @@ public record AgendamentoDtoResponse(
         AgendamentoStatus status,
         String descricao,
         String anotacao,
-        Long clientId,
-        Long userId
+        String clientNome,
+        String userNome
 ) {}

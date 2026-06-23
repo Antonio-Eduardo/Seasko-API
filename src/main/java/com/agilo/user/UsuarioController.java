@@ -2,6 +2,7 @@ package com.agilo.user;
 
 import com.agilo.user.dto.UsuarioDtoRequest;
 import com.agilo.user.dto.UsuarioDtoResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -28,7 +29,7 @@ public class UsuarioController {
         return ResponseEntity.ok().body(response);
     }
     @PostMapping("/registrar")
-    public ResponseEntity<UsuarioDtoResponse> insertUser(@RequestBody UsuarioDtoRequest dto){
+    public ResponseEntity<UsuarioDtoResponse> insertUser(@RequestBody @Valid UsuarioDtoRequest dto){
         UsuarioDtoResponse response = usuarioService.insertUser(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
@@ -39,7 +40,7 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<UsuarioDtoResponse> atualizarUmUsuario(@PathVariable Long id, @RequestBody UsuarioDtoRequest dto){
+    public ResponseEntity<UsuarioDtoResponse> atualizarUmUsuario(@PathVariable Long id, @RequestBody @Valid UsuarioDtoRequest dto){
         UsuarioDtoResponse response = usuarioService.updateUser(id,dto);
         return ResponseEntity.ok().body(response);
     }
