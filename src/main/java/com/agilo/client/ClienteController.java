@@ -24,9 +24,10 @@ public class ClienteController {
     @GetMapping
     public ResponseEntity<PageResponse<ClienteDtoResponse>> todosClientes(
             @RequestParam(defaultValue = "0")  int page,
-            @RequestParam(defaultValue = "25") int size) {
+            @RequestParam(defaultValue = "25") int size,
+            @RequestParam(required = false) String busca) {
         var pageable = PageRequest.of(page, size, Sort.by("nome").ascending());
-        PageResponse<ClienteDtoResponse> response = clienteService.getAllClients(pageable);
+        PageResponse<ClienteDtoResponse> response = clienteService.getAllClients(busca, pageable);
         return ResponseEntity.ok(response);
     }
     @GetMapping("/{id}")

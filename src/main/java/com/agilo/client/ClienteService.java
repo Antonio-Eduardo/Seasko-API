@@ -20,8 +20,10 @@ public class ClienteService {
         this.repository = repository;
     }
 
-    public PageResponse<ClienteDtoResponse> getAllClients(Pageable pageable) {
-        Page<Cliente> page = repository.findAll(pageable);
+    public PageResponse<ClienteDtoResponse> getAllClients(String busca, Pageable pageable) {
+        Page<Cliente> page = (busca == null || busca.isBlank())
+                ? repository.findAll(pageable)
+                : repository.findByNomeContainingIgnoreCaseOrTelefoneContaining(busca, busca, pageable);
         return new PageResponse<>(
                 page.getContent().stream().map(this::toResponse).toList(),
                 page.getNumber(),

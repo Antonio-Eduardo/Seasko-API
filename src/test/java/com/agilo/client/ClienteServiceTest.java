@@ -50,7 +50,7 @@ class ClienteServiceTest {
         Pageable pageable = PageRequest.of(0, 25);
         when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(cliente), pageable, 1));
 
-        PageResponse<ClienteDtoResponse> result = service.getAllClients(pageable);
+        PageResponse<ClienteDtoResponse> result = service.getAllClients(null, pageable);
 
         assertThat(result.content()).hasSize(1);
         assertThat(result.totalElements()).isEqualTo(1L);
@@ -65,7 +65,7 @@ class ClienteServiceTest {
         Pageable pageable = PageRequest.of(0, 25);
         when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(), pageable, 0));
 
-        PageResponse<ClienteDtoResponse> result = service.getAllClients(pageable);
+        PageResponse<ClienteDtoResponse> result = service.getAllClients(null, pageable);
         assertThat(result.content()).isEmpty();
         assertThat(result.totalElements()).isZero();
     }
