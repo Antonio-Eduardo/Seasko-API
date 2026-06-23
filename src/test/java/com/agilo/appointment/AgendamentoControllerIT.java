@@ -85,7 +85,6 @@ class AgendamentoControllerIT {
               "horaFim": "10:00",
               "clientId": %d,
               "userId": %d,
-              "status": "MARCADO",
               "descricao": "Corte",
               "anotacao": ""
             }

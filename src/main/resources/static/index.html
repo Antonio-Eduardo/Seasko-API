@@ -538,7 +538,7 @@
           <label>Hora fim</label>
           <input id="f-fim" type="time" />
         </div>
-        <div class="field">
+        <div class="field span2">
           <label>Descrição</label>
           <input id="f-descricao" type="text" />
         </div>
@@ -582,6 +582,16 @@
     <div class="aba-header">
       <span class="aba-title">Clientes</span>
       <button class="btn btn-primary" onclick="toggleFormCliente()">+ Novo cliente</button>
+    </div>
+    <div class="card" style="margin-bottom:16px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="field" style="flex:1;margin:0">
+          <input id="cl-busca" type="text" placeholder="Buscar por nome ou telefone…"
+                 onkeydown="if(event.key==='Enter')buscarClientes()" />
+        </div>
+        <button class="btn btn-primary" onclick="buscarClientes()">Buscar</button>
+        <button class="btn btn-ghost"   onclick="limparBuscaClientes()">Limpar</button>
+      </div>
     </div>
     <div class="card" id="form-cliente" style="display:none">
       <div class="card-title">Novo cliente</div>
@@ -919,8 +929,8 @@ function renderAgendamentos(pageResp) {
       <td class="col-id" style="color:var(--color-muted);font-size:.8rem">${a.id}</td>
       <td class="col-data">${fmtData(a.dataMarcada)}</td>
       <td class="col-hora" style="color:var(--color-sub)">${fmtHora(a.horaInicio)} – ${fmtHora(a.horaFim)}</td>
-      <td><strong style="font-weight:500">${nomeCliente(a.clientId)}</strong></td>
-      <td style="color:var(--color-sub)">${nomeUsuario(a.userId)}</td>
+      <td><strong style="font-weight:500">${esc(a.clientNome ?? '—')}</strong></td>
+      <td style="color:var(--color-sub)">${esc(a.userNome ?? '—')}</td>
       <td style="color:var(--color-sub);font-size:.85rem">${esc(a.descricao ?? '—')}</td>
       <td class="col-status"><span class="badge ${a.status}">${a.status}</span></td>
       <td class="col-acoes">
@@ -1027,8 +1037,8 @@ async function criarAgendamento(btn) {
     dataMarcada: document.getElementById('f-data').value,
     horaInicio:  toTime(document.getElementById('f-inicio').value),
     horaFim:     toTime(document.getElementById('f-fim').value),
-    descricao:   document.getElementById('f-descricao').value || null,
-    anotacao:    document.getElementById('f-anotacao').value  || null
+    descricao:   document.getElementById('f-descricao').value.trim() || null,
+    anotacao:    document.getElementById('f-anotacao').value.trim()  || null
   };
   const orig = btn.textContent; btn.disabled = true; btn.textContent = 'Salvando…';
   try {
@@ -1174,11 +1184,25 @@ async function recarregarClientes() {
   setLoading('tbody-cl', 6);
   document.getElementById('pag-cl').innerHTML = '';
   try {
-    const resp = await api(`/cliente?page=${clPage}&size=25`);
+    const busca = document.getElementById('cl-busca')?.value.trim() ?? '';
+    const params = new URLSearchParams({ page: clPage, size: 25 });
+    if (busca) params.set('busca', busca);
+    const resp = await api(`/cliente?${params}`);
     clientes = resp.content;
     preencherDropdowns();
     renderClientes(resp);
   } catch (e) { toast(e.message, true); }
+}
+
+function buscarClientes() {
+  clPage = 0;
+  recarregarClientes();
+}
+
+function limparBuscaClientes() {
+  document.getElementById('cl-busca').value = '';
+  clPage = 0;
+  recarregarClientes();
 }
 
 function mudarPaginaCl(delta) {

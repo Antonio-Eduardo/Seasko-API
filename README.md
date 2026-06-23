@@ -29,20 +29,14 @@ Composto por uma **API REST Spring Boot** e um **frontend SPA** (HTML/CSS/JS pur
 
 ## Configuração
 
-Copie o arquivo de exemplo e preencha com suas credenciais:
+As credenciais do banco são lidas de variáveis de ambiente. Defina-as antes de executar:
 
 ```bash
-cp src/main/resources/application.properties.example src/main/resources/application.properties
-```
-
-Edite `application.properties`:
-
-```properties
-spring.application.name=studio-web
-spring.datasource.url=jdbc:postgresql://localhost:5432/studio-web
-spring.datasource.username=<seu_usuario>
-spring.datasource.password=<sua_senha>
-spring.jpa.hibernate.ddl-auto=update
+export PGHOST=localhost
+export PGPORT=5432
+export PGDATABASE=agilo
+export PGUSER=<seu_usuario>
+export PGPASSWORD=<sua_senha>
 ```
 
 O banco de dados e as tabelas são criados automaticamente pelo Hibernate na primeira execução.
@@ -97,8 +91,7 @@ curl -u admin:admin123 http://localhost:8080/usuario
   "nome": "Maria Silva",
   "usuario": "maria",
   "senha": "senha123",
-  "role": "EMPLOYEE",
-  "ativo": true
+  "role": "EMPLOYEE"
 }
 ```
 
@@ -121,13 +114,13 @@ curl -u admin:admin123 http://localhost:8080/usuario
 
 | Método | Path                      | Descrição         | Query params   |
 |--------|---------------------------|-------------------|----------------|
-| GET    | `/cliente`                | Listar (paginado) | `page`, `size` |
+| GET    | `/cliente`                | Listar (paginado) | `page`, `size`, `busca` |
 | GET    | `/cliente/{id}`           | Buscar por ID     | —              |
 | POST   | `/cliente/inserir`        | Criar             | —              |
 | PUT    | `/cliente/atualizar/{id}` | Atualizar         | —              |
 | DELETE | `/cliente/deletar/{id}`   | Remover           | —              |
 
-`page` default `0` · `size` default `25` · ordenado por `nome` asc.
+`page` default `0` · `size` default `25` · `busca` filtra por nome ou telefone (parcial, case-insensitive) · ordenado por `nome` asc.
 
 **ClienteDtoRequest:**
 ```json

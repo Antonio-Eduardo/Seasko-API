@@ -13,7 +13,7 @@ public record AgendamentoDtoRequest(
         @NotNull LocalTime horaFim,
         @NotNull Long clientId,
         @NotNull Long userId,
-        @NotNull AgendamentoStatus status,
+        AgendamentoStatus status,
         @NotBlank String descricao,
         String anotacao
 ) {}
